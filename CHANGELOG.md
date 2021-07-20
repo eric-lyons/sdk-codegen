@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.12.0](https://www.github.com/looker-open-source/sdk-codegen/compare/sdk-codegen-all-v1.11.0...sdk-codegen-all-v1.12.0) (2021-07-20)
+
+
+### Features
+
+* add 2 Python examples (pause/copy schedules, kill queries) ([#757](https://www.github.com/looker-open-source/sdk-codegen/issues/757)) ([787eeeb](https://www.github.com/looker-open-source/sdk-codegen/commit/787eeeb16d34dc27af01deef40fd69e175186f65))
+* adding python example for folder permission access ([#758](https://www.github.com/looker-open-source/sdk-codegen/issues/758)) ([21e52df](https://www.github.com/looker-open-source/sdk-codegen/commit/21e52df573fcedab65449b3554d4f35ddee503d3))
+
+
+### Bug Fixes
+
+* dev portal apix tweaks ([#760](https://www.github.com/looker-open-source/sdk-codegen/issues/760)) ([6e937f4](https://www.github.com/looker-open-source/sdk-codegen/commit/6e937f4778457021dd739e849e209ad4de7bb450))
+* uses consistent heading text ([#761](https://www.github.com/looker-open-source/sdk-codegen/issues/761)) ([2e308ec](https://www.github.com/looker-open-source/sdk-codegen/commit/2e308ec1c6b4f181be12dda806955f8913336234))
+
 ## [1.11.0](https://www.github.com/looker-open-source/sdk-codegen/compare/sdk-codegen-all-v1.10.1...sdk-codegen-all-v1.11.0) (2021-07-15)
 
 

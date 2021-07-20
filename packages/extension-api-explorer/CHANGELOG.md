@@ -1,5 +1,14 @@
 # Changelog
 
+### [21.11.1](https://www.github.com/looker-open-source/sdk-codegen/compare/extension-api-explorer-v21.11.0...extension-api-explorer-v21.11.1) (2021-07-20)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @looker/api-explorer bumped from ^0.9.15 to ^0.9.16
+
 ## [21.11.0](https://www.github.com/looker-open-source/sdk-codegen/compare/extension-api-explorer-v21.10.1...extension-api-explorer-v21.11.0) (2021-07-15)
 
 

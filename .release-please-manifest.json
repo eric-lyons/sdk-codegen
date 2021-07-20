@@ -1,8 +1,8 @@
 {
-  ".": "1.11.0",
-  "packages/api-explorer": "0.9.15",
+  ".": "1.12.0",
+  "packages/api-explorer": "0.9.16",
   "packages/code-editor": "0.1.7",
-  "packages/extension-api-explorer": "21.11.0",
+  "packages/extension-api-explorer": "21.11.1",
   "packages/extension-sdk": "21.10.1",
   "packages/extension-sdk-react": "21.10.1",
   "packages/hackathon": "21.10.1",
