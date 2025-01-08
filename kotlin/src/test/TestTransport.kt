@@ -24,18 +24,18 @@
 
 import com.google.gson.Gson
 import com.looker.rtl.*
+import com.looker.rtl.SDKResponse.Companion.ERROR_BODY
 import com.looker.sdk.AGENT_TAG
 import com.looker.sdk.ENVIRONMENT_PREFIX
 import com.looker.sdk.LOOKER_APPID
+import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.junit.Test
-import java.io.File
 
 class TestTransport {
     val fullPath = "https://github.com/looker-open-source/sdk-codegen/"
     val base = "https://my.looker.com:19999"
-    val apiVersion = "3.1"
+    val apiVersion = "4.0"
     val userPath = "/user"
     val headers = mapOf(LOOKER_APPID to AGENT_TAG, "User-Agent" to AGENT_TAG)
 
@@ -107,14 +107,31 @@ class TestTransport {
   "num4": 4
 }
         """.trimIndent()
-        /// we use GSon so verify GSon handles ... flexible ... json
+        // / we use GSon so verify GSon handles ... flexible ... json
         val gson = Gson()
-        var testModel = gson.fromJson(payload, TestModel::class.java)
-        assertEquals(testModel.string1, "1")
-        assertEquals(testModel.num1, 1)
-        assertEquals(testModel.string2, "2")
-        assertEquals(testModel.num2, 2)
-        assertEquals(testModel.string3, "3")
-        assertEquals(testModel.num3, 3)
+        val testModel = gson.fromJson(payload, TestModel::class.java)
+        assertEquals("1", testModel.string1)
+        assertEquals(1, testModel.num1)
+        assertEquals("2", testModel.string2)
+        assertEquals(2, testModel.num2)
+        assertEquals("3", testModel.string3)
+        assertEquals(3, testModel.num3)
+    }
+
+    @Test
+    fun testEmptyError() {
+        val error = parseSDKError("")
+        assertTrue(error.message.isEmpty())
+        assertTrue(error.errors.isEmpty())
+        assertTrue(error.documentationUrl.isEmpty())
+    }
+
+    @Test
+    fun testSummaryError() {
+        val payload = """Some kind of error happened! $ERROR_BODY: {"message":"Oops!","documentation_url":"MyBad"}"""
+        val error = parseSDKError(payload)
+        assertEquals("Oops!", error.message)
+        assertTrue(error.errors.isEmpty())
+        assertEquals("MyBad", error.documentationUrl)
     }
 }

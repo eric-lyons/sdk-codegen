@@ -24,46 +24,48 @@
 
  */
 
-import React, { useEffect, useState } from 'react'
-import styled from 'styled-components'
-import { Accordion2, Heading } from '@looker/components'
-import type { TypeList } from '@looker/sdk-codegen'
-import { useHistory, useRouteMatch } from 'react-router-dom'
-import { useSelector } from 'react-redux'
-
-import { Link } from '../Link'
-import { buildTypePath, highlightHTML } from '../../utils'
-import { selectSearchPattern } from '../../state'
+import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
+import { Accordion2, Heading } from '@looker/components';
+import type { TypeList } from '@looker/sdk-codegen';
+import { useRouteMatch } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { Link } from '../Link';
+import { buildTypePath, highlightHTML, useNavigation } from '../../utils';
+import { selectSearchPattern } from '../../state';
 
 interface TypesProps {
-  types: TypeList
-  tag: string
-  specKey: string
-  className?: string
-  defaultOpen?: boolean
+  types: TypeList;
+  tag: string;
+  specKey: string;
+  className?: string;
+  defaultOpen?: boolean;
 }
 
 export const SideNavTypes = styled(
   ({ className, types, tag, specKey, defaultOpen = false }: TypesProps) => {
-    const searchPattern = useSelector(selectSearchPattern)
+    const { navigate, buildPathWithGlobalParams } = useNavigation();
+    const searchPattern = useSelector(selectSearchPattern);
     const match = useRouteMatch<{ typeTag: string }>(
       `/:specKey/types/:typeTag/:typeName?`
-    )
-    const [isOpen, setIsOpen] = useState(defaultOpen)
-    const history = useHistory()
-
+    );
+    const [isOpen, setIsOpen] = useState(defaultOpen);
     const handleOpen = () => {
-      const _isOpen = !isOpen
-      setIsOpen(_isOpen)
-      if (_isOpen) history.push(`/${specKey}/types/${tag}`)
-    }
+      const _isOpen = !isOpen;
+      setIsOpen(_isOpen);
+      if (_isOpen) {
+        navigate(`/${specKey}/types/${tag}`);
+      } else {
+        navigate(`/${specKey}/types`);
+      }
+    };
 
     useEffect(() => {
       const status = match
         ? defaultOpen || match.params.typeTag === tag
-        : defaultOpen
-      setIsOpen(status)
-    }, [defaultOpen])
+        : defaultOpen;
+      setIsOpen(status);
+    }, [defaultOpen]);
 
     /* TODO: Fix highlighting. It is applied but it is somehow being overridden */
     return (
@@ -78,16 +80,20 @@ export const SideNavTypes = styled(
         }
       >
         <ul>
-          {Object.values(types).map((type) => (
+          {Object.values(types).map(type => (
             <li key={type.name}>
-              <Link to={`${buildTypePath(specKey, tag, type.name)}`}>
+              <Link
+                to={buildPathWithGlobalParams(
+                  buildTypePath(specKey, tag, type.name)
+                )}
+              >
                 {highlightHTML(searchPattern, type.name)}
               </Link>
             </li>
           ))}
         </ul>
       </Accordion2>
-    )
+    );
   }
 )`
   font-family: ${({ theme }) => theme.fonts.brand};
@@ -132,4 +138,4 @@ export const SideNavTypes = styled(
       background: ${({ theme }) => theme.colors.ui1};
     }
   }
-`
+`;

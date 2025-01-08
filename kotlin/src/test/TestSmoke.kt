@@ -2,11 +2,11 @@ import com.looker.rtl.DelimArray
 import com.looker.rtl.SDKResponse
 import com.looker.sdk.*
 import org.junit.Test
+import java.io.Serializable
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-import java.io.Serializable
 
 class TestSmoke {
     private val sdk by lazy { TestConfig().sdk }
@@ -30,13 +30,12 @@ class TestSmoke {
             "system__activity",
             "dashboard",
             arrayOf("dashboard.id", "dashboard.title", "dashboard.count"),
-            limit = "100"
+            limit = "100",
         )
     }
 
     @ExperimentalUnsignedTypes
     fun mimeType(data: UByteArray): String {
-
         val b = data[0]
         val n = b.toUInt().toInt()
         return when (n) {
@@ -73,7 +72,7 @@ class TestSmoke {
             if (dashboards.isNotEmpty()) {
                 type = "dashboard"
                 dashboards[0].id?.let {
-                    dashId ->
+                        dashId ->
                     id = dashId
                 }
             }
@@ -126,7 +125,7 @@ class TestSmoke {
             val task = WriteCreateQueryTask(
                 query_id = id,
                 source = "test",
-                result_format = ResultFormat.csv
+                result_format = ResultFormat.csv,
             )
             val created = sdk.ok<QueryTask>(sdk.create_query_task(task))
             assertEquals(id, created.query_id, "Query id matches")
@@ -157,11 +156,11 @@ class TestSmoke {
     fun testAllUsersWithIds() {
         prepUsers()
         val allUsers = sdk.ok<Array<User>>(sdk.all_users())
-        val userIds: Array<Long> = allUsers
+        val userIds: Array<String> = allUsers
             .map { u -> u.id!! }
             .take(2)
             .toTypedArray()
-        val ids = DelimArray<Long>(userIds)
+        val ids = DelimArray<String>(userIds)
         val users = sdk.ok<Array<User>>(sdk.all_users(ids = ids))
         assertEquals(2, users.size, "Should retrieve 2 users.")
         assertEquals(userIds[0], users[0].id)
@@ -218,9 +217,9 @@ class TestSmoke {
 /**
  * Dummy user data class based on [User] but with a subset of its properties.
  */
-data class DummyUser (
+data class DummyUser(
     var id: Long? = null,
     var credentials_api3: Array<CredentialsApi3>? = null,
     var display_name: String? = null,
-    var email: String? = null
+    var email: String? = null,
 ) : Serializable

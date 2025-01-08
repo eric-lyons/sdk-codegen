@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "lib": ["ES2019", "dom"],
+    "lib": ["ES2019", "dom", "dom.iterable"],
     "module": "commonjs",
     "target": "ES2019",
     "jsx": "react",
@@ -21,8 +21,7 @@
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "skipLibCheck": true,
-    "suppressImplicitAnyIndexErrors": true
+    "skipLibCheck": true
   },
   "exclude": ["lib", "node_modules"],
   "include": ["*.css"]

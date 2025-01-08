@@ -23,55 +23,84 @@
  SOFTWARE.
 
  */
-import type { FC } from 'react'
-import React, { useEffect, useState } from 'react'
-import { Grid, ButtonToggle, ButtonItem } from '@looker/components'
-import type { ApiModel } from '@looker/sdk-codegen'
-import { useParams, useHistory } from 'react-router-dom'
-import { ApixSection, DocTitle, DocTypeSummary, Link } from '../../components'
-import { buildTypePath } from '../../utils'
-import { getMetaTypes } from './utils'
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
+import { ButtonItem, ButtonToggle, Grid } from '@looker/components';
+import type { ApiModel } from '@looker/sdk-codegen';
+import { useLocation, useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { ApixSection, DocTitle, DocTypeSummary, Link } from '../../components';
+import { buildTypePath, isValidFilter, useNavigation } from '../../utils';
+import { selectTagFilter, useSettingActions } from '../../state';
+import { useTagStoreSync } from '../utils';
+import { getMetaTypes } from './utils';
 
 interface TypeTagSceneProps {
-  api: ApiModel
+  api: ApiModel;
 }
 
 interface TypeTagSceneParams {
-  specKey: string
-  typeTag: string
+  specKey: string;
+  typeTag: string;
 }
 
 export const TypeTagScene: FC<TypeTagSceneProps> = ({ api }) => {
-  const { specKey, typeTag } = useParams<TypeTagSceneParams>()
-  const history = useHistory()
-  const [value, setValue] = useState('ALL')
+  const { specKey, typeTag } = useParams<TypeTagSceneParams>();
+  const location = useLocation();
+  const { navigate, buildPathWithGlobalParams, navigateWithGlobalParams } =
+    useNavigation();
+  const selectedTagFilter = useSelector(selectTagFilter);
+  const { setTagFilterAction } = useSettingActions();
+  const [tagFilter, setTagFilter] = useState(selectedTagFilter);
+  useTagStoreSync();
+
+  const handleChange = (filter: string) => {
+    navigate(location.pathname, {
+      t: filter === 'ALL' ? null : filter.toLowerCase(),
+    });
+  };
 
   useEffect(() => {
-    /** Reset ButtonToggle value on route change */
-    setValue('ALL')
-  }, [typeTag])
+    const searchParams = new URLSearchParams(location.search);
+    let verbParam = searchParams.get('t') || 'ALL';
+    verbParam = isValidFilter(location.pathname, verbParam)
+      ? verbParam.toUpperCase()
+      : 'ALL';
+    setTagFilterAction({
+      tagFilter: verbParam,
+    });
+  }, [location.search]);
 
-  const types = api.typeTags[typeTag]
+  const types = api.typeTags[typeTag];
   useEffect(() => {
     if (!types) {
-      history.push(`/${specKey}/types`)
+      navigateWithGlobalParams(`/${specKey}/types`);
     }
-  }, [history, types])
+  }, [types]);
+
+  useEffect(() => {
+    setTagFilter(selectedTagFilter);
+  }, [selectedTagFilter]);
 
   if (!types) {
-    return <></>
+    return <></>;
   }
 
-  const tag = Object.values(api.spec.tags!).find((tag) => tag.name === typeTag)!
-  const metaTypes = getMetaTypes(types)
+  const tag = Object.values(api.spec.tags!).find(tag => tag.name === typeTag)!;
+  const metaTypes = getMetaTypes(types);
   return (
     <ApixSection>
       <DocTitle>{`${tag.name}: ${tag.description}`}</DocTitle>
-      <ButtonToggle mb="small" mt="xlarge" value={value} onChange={setValue}>
+      <ButtonToggle
+        mb="small"
+        mt="xlarge"
+        value={tagFilter}
+        onChange={handleChange}
+      >
         <ButtonItem key="ALL" px="large" py="xsmall">
           ALL
         </ButtonItem>
-        {metaTypes.map((op) => (
+        {metaTypes.map(op => (
           <ButtonItem key={op} px="large" py="xsmall">
             {op}
           </ButtonItem>
@@ -79,9 +108,14 @@ export const TypeTagScene: FC<TypeTagSceneProps> = ({ api }) => {
       </ButtonToggle>
       {Object.values(types).map(
         (type, index) =>
-          (value === 'ALL' ||
-            value === type.metaType.toString().toUpperCase()) && (
-            <Link key={index} to={buildTypePath(specKey, tag.name, type.name)}>
+          (selectedTagFilter === 'ALL' ||
+            selectedTagFilter === type.metaType.toString().toUpperCase()) && (
+            <Link
+              key={index}
+              to={buildPathWithGlobalParams(
+                buildTypePath(specKey, tag.name, type.name)
+              )}
+            >
               <Grid columns={1} py="xsmall">
                 <DocTypeSummary key={index} type={type} />
               </Grid>
@@ -89,5 +123,5 @@ export const TypeTagScene: FC<TypeTagSceneProps> = ({ api }) => {
           )
       )}
     </ApixSection>
-  )
-}
+  );
+};

@@ -1,5 +1,7 @@
 # @looker/extension-utils
 
+Easier browser-based TypeScript authentication via OAuth, and support for building React applications that can run both inside and outside of [Looker's Extension Framework](https://docs.looker.com/data-modeling/extension-framework/extension-framework-intro) hosting environment.
+
 ## "Dual mode" Looker browser applications
 
 This package provides interfaces and classes that support building a Looker application that can be both hosted as
@@ -38,16 +40,16 @@ The following code, extracted from the [Hackathon application's index.tsx](https
 configures the extension provider so the extension SDK and extension adaptor can be used in the [`<Hackathon />`](https://github.com/looker-open-source/sdk-codegen/tree/main/packages/hackathon/src/Hackathon.tsx) React component.
 
 ```tsx
-import * as React from 'react'
-import * as ReactDOM from 'react-dom'
-import { ExtensionProvider } from '@looker/extension-sdk-react'
-import { Provider } from 'react-redux'
-import { Hackathon } from './Hackathon'
-import store from './data/store'
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+import { ExtensionProvider } from '@looker/extension-sdk-react';
+import { Provider } from 'react-redux';
+import { Hackathon } from './Hackathon';
+import store from './data/store';
 
 window.addEventListener('DOMContentLoaded', (_) => {
-  const root = document.createElement('div')
-  document.body.appendChild(root)
+  const root = document.createElement('div');
+  document.body.appendChild(root);
   ReactDOM.render(
     <ExtensionProvider requiredLookerVersion=">=21.3.0">
       <Provider store={store}>
@@ -55,25 +57,25 @@ window.addEventListener('DOMContentLoaded', (_) => {
       </Provider>
     </ExtensionProvider>,
     root
-  )
-})
+  );
+});
 ```
 
 Inside `<Hackathon />`, this is the code that sets up the theming and "browser API" services like opening links:
 
 ```tsx
-  const extSdk = getExtensionSDK()
-  const adaptor = new ExtensionAdaptor(extSdk)
-  const themeOverrides = adaptor.themeOverrides()
+const extSdk = getExtensionSDK();
+const adaptor = new ExtensionAdaptor(extSdk);
+const themeOverrides = adaptor.themeOverrides();
 
 // ...
 
-  return (
-    <ComponentsProvider
-      loadGoogleFonts={themeOverrides.loadGoogleFonts}
-      themeCustomizations={themeOverrides.themeCustomizations}
-    >
-      // ...
-    </ComponentsProvider>
-  )
+return (
+  <ComponentsProvider
+    loadGoogleFonts={themeOverrides.loadGoogleFonts}
+    themeCustomizations={themeOverrides.themeCustomizations}
+  >
+    // ...
+  </ComponentsProvider>
+);
 ```

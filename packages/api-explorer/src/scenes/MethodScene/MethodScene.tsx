@@ -24,96 +24,109 @@
 
  */
 
-import type { FC } from 'react'
-import React, { useState, useEffect } from 'react'
+import type { FC } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Aside,
   Button,
   ButtonOutline,
-  Space,
-  useToggle,
   ExtendComponentsThemeProvider,
-} from '@looker/components'
-import { Beaker } from '@looker/icons'
-import { useHistory, useParams } from 'react-router-dom'
-import { RunIt, RunItFormKey } from '@looker/run-it'
-import type { ApiModel } from '@looker/sdk-codegen'
-import { typeRefs } from '@looker/sdk-codegen'
-import { useSelector } from 'react-redux'
-import type { IEnvironmentAdaptor } from '@looker/extension-utils'
+  Space,
+  Span,
+  useToggle,
+} from '@looker/components';
+import { Beaker } from '@looker/icons';
+import { useHistory, useParams } from 'react-router-dom';
+import { RunIt, RunItFormKey } from '@looker/run-it';
+import type { ApiModel } from '@looker/sdk-codegen';
+import { typeRefs } from '@looker/sdk-codegen';
+import { useSelector } from 'react-redux';
+import type { IEnvironmentAdaptor } from '@looker/extension-utils';
 
-import { getApixAdaptor } from '../../utils'
+import { getApixAdaptor, useNavigation, useQuery } from '../../utils';
 import {
   ApixSection,
   DocActivityType,
   DocMarkdown,
   DocRateLimited,
   DocReferences,
-  DocResponses,
   DocSDKs,
+  DocSchema,
   DocSdkUsage,
   DocSource,
   DocStatus,
   DocTitle,
-  DocSchema,
-} from '../../components'
-import { selectSdkLanguage } from '../../state'
-import { DocOperation, DocRequestBody } from './components'
+} from '../../components';
+import { selectSdkLanguage } from '../../state';
+import { DocOperation, DocRequestBody, DocResponses } from './components';
 
 interface MethodSceneProps {
-  api: ApiModel
+  api: ApiModel;
 }
 
 interface MethodSceneParams {
-  methodName: string
-  methodTag: string
-  specKey: string
+  methodName: string;
+  methodTag: string;
+  specKey: string;
 }
 
 const showRunIt = async (adaptor: IEnvironmentAdaptor) => {
-  const data = await adaptor.localStorageGetItem(RunItFormKey)
-  return !!data
-}
+  const data = await adaptor.localStorageGetItem(RunItFormKey);
+  return !!data;
+};
 
 export const MethodScene: FC<MethodSceneProps> = ({ api }) => {
-  const adaptor = getApixAdaptor()
-  const history = useHistory()
-  const sdkLanguage = useSelector(selectSdkLanguage)
-  const { specKey, methodTag, methodName } = useParams<MethodSceneParams>()
-  const { value, toggle, setOn } = useToggle()
-  const [method, setMethod] = useState(api.methods[methodName])
-  const seeTypes = typeRefs(api, method?.customTypes)
-
-  const RunItButton = value ? Button : ButtonOutline
+  const adaptor = getApixAdaptor();
+  const history = useHistory();
+  const { navigate } = useNavigation();
+  const sdkLanguage = useSelector(selectSdkLanguage);
+  const { specKey, methodTag, methodName } = useParams<MethodSceneParams>();
+  const { value, toggle, setOn } = useToggle();
+  const [method, setMethod] = useState(api.methods[methodName]);
+  const seeTypes = typeRefs(api, method?.customTypes);
+  const query = useQuery();
+  const errorCode = query.get('e') ?? undefined;
+  const RunItButton = value ? Button : ButtonOutline;
+  const docResponsesRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const foundMethod = api.methods[methodName]
+    const foundMethod = api.methods[methodName];
     if (foundMethod) {
-      setMethod(api.methods[methodName])
+      setMethod(api.methods[methodName]);
     } else {
       // Invalid method
       if (api.tags[methodTag]) {
         // Found tag though
-        history.push(`/${specKey}/methods/${methodTag}`)
+        navigate(`/${specKey}/methods/${methodTag}`);
       } else {
-        history.push(`/${specKey}/methods`)
+        navigate(`/${specKey}/methods`);
       }
     }
-  }, [api, history, methodName, methodTag, specKey])
+  }, [api, history, methodName, methodTag, specKey]);
 
   useEffect(() => {
     const checkRunIt = async () => {
       try {
-        const show = await showRunIt(adaptor)
+        const show = await showRunIt(adaptor);
         if (show) {
-          setOn()
+          setOn();
         }
       } catch (error) {
-        console.error(error)
+        console.error(error);
+      }
+    };
+    checkRunIt();
+  }, [adaptor, setOn]);
+
+  useEffect(() => {
+    if (method?.responses && errorCode) {
+      if (docResponsesRef.current) {
+        window.setTimeout(() => {
+          docResponsesRef.current!.scrollIntoView();
+        }, 300);
       }
     }
-    checkRunIt()
-  }, [adaptor, setOn])
+  }, [method]);
 
   const runItToggle = (
     <RunItButton
@@ -123,7 +136,7 @@ export const MethodScene: FC<MethodSceneProps> = ({ api }) => {
     >
       Run It
     </RunItButton>
-  )
+  );
 
   return (
     <>
@@ -147,7 +160,9 @@ export const MethodScene: FC<MethodSceneProps> = ({ api }) => {
           <DocRequestBody api={api} method={method} />
           <DocSdkUsage method={method} />
           <DocReferences typesUsed={seeTypes} api={api} specKey={specKey} />
-          <DocResponses api={api} responses={method.responses} />
+          <Span ref={docResponsesRef}>
+            <DocResponses api={api} method={method} errorCode={errorCode} />
+          </Span>
           <DocSchema object={method.schema} />
         </ApixSection>
       )}
@@ -175,5 +190,5 @@ export const MethodScene: FC<MethodSceneProps> = ({ api }) => {
         </Aside>
       )}
     </>
-  )
-}
+  );
+};

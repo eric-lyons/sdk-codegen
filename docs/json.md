@@ -14,8 +14,8 @@ We introduced API 4.0 to guarantee the JSON payload response types match the API
 
 ## Lookering forward
 
-Current users of Looker SDKs may have noticed that some `id` properties are typed as `integer` and some are typed as `string`. For the stable (aka GA, generally available) release of API 4.0, all `id` references will be typed as `string`.
-Using strings for all ID references will allow Looker to scale out Looker services in the future, once ID generation does not require an auto-increment numeric ID value from a monolithic instance.
+Current users of Looker SDKs may have noticed that some `id` properties are typed as `integer` and some are typed as `string`. With the stable (aka GA, generally available) release of API 4.0, all `id` references have been typed as `string`.
+Using strings for all ID references allows Looker to scale out Looker services in the future, once ID generation does not require an auto-increment numeric ID value from a monolithic instance.
 
 We have worked to minimize the impact of this type change for all Looker-provided language SDKs. This document describes some JSON parsing requirements and how our SDKs support them.
 
@@ -78,12 +78,12 @@ Given the following TypeScript interface:
 
 ```ts
 interface ITestModel {
-  string1: string
-  num1: number
-  string2: string
-  num2: number
-  string3: string
-  num3: number
+  string1: string;
+  num1: number;
+  string2: string;
+  num2: number;
+  string3: string;
+  num3: number;
 }
 ```
 
@@ -92,15 +92,15 @@ We want the TypeScript SDK to successfully deserialize the payload into `ITestMo
 This test passes:
 
 ```ts
-const typed = await sdkOk(xp.parseResponse<ITestModel, ISDKError>(resp))
-expect(typed.string1).toBe(1)
-expect(typed.num1).toBe(1)
-expect(typed.string2).toBe('2')
-expect(typed.num2).toBe('2')
-expect(typed.string3).toBe('3')
-expect(typed.num3).toBe(3)
-expect((typed as any).string4).toBe('4')
-expect((typed as any).num4).toBe(4)
+const typed = await sdkOk(xp.parseResponse<ITestModel, ISDKError>(resp));
+expect(typed.string1).toBe(1);
+expect(typed.num1).toBe(1);
+expect(typed.string2).toBe('2');
+expect(typed.num2).toBe('2');
+expect(typed.string3).toBe('3');
+expect(typed.num3).toBe(3);
+expect((typed as any).string4).toBe('4');
+expect((typed as any).num4).toBe(4);
 ```
 
 ### TypeScript caveats

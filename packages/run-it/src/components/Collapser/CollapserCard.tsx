@@ -23,36 +23,37 @@
  SOFTWARE.
 
  */
-import type { FC, ReactElement } from 'react'
-import React from 'react'
-import { useToggle, Accordion2, Divider, Box } from '@looker/components'
-import { ArrowRight } from '@styled-icons/material/ArrowRight'
-import { ArrowDropDown } from '@styled-icons/material/ArrowDropDown'
-import { RunItHeading } from '../common'
+import type { ReactElement } from 'react';
+import React from 'react';
+import { Accordion2, Box2, Divider, useToggle } from '@looker/components';
+import { ArrowRight } from '@styled-icons/material/ArrowRight';
+import { ArrowDropDown } from '@styled-icons/material/ArrowDropDown';
+
+import { RunItHeading } from '../common';
 
 interface CollapserCardProps {
-  id?: string
-  heading: string
-  children: ReactElement
-  defaultOpen?: boolean
-  divider?: boolean
+  id?: string;
+  heading: string;
+  children: ReactElement;
+  defaultOpen?: boolean;
+  divider?: boolean;
 }
 
 /**
  * Render a collapsable header and children
  */
-export const CollapserCard: FC<CollapserCardProps> = ({
+export const CollapserCard = ({
   id,
   heading,
   children,
   defaultOpen = true,
   divider = true,
-}) => {
-  const level = divider ? 'h3' : 'h4'
-  const { value, toggle } = useToggle(defaultOpen)
+}: CollapserCardProps) => {
+  const level = divider ? 'h3' : 'h4';
+  const { value, toggle } = useToggle(defaultOpen);
 
   return (
-    <>
+    <Box2 display="flex" flexDirection="column">
       {divider && <Divider appearance="light" />}
       <Accordion2
         id={id}
@@ -62,8 +63,8 @@ export const CollapserCard: FC<CollapserCardProps> = ({
         indicatorIcons={{ close: <ArrowRight />, open: <ArrowDropDown /> }}
         label={<RunItHeading as={level}>{heading}</RunItHeading>}
       >
-        <Box pb="xlarge">{children}</Box>
+        <Box2 pb="xlarge">{children}</Box2>
       </Accordion2>
-    </>
-  )
-}
+    </Box2>
+  );
+};

@@ -23,5 +23,6 @@
  SOFTWARE.
 
  */
-export { DocOperation } from './DocOperation'
-export { DocRequestBody } from './DocRequestBody'
+export { DocOperation } from './DocOperation';
+export { DocRequestBody } from './DocRequestBody';
+export { DocResponses } from './DocResponses';

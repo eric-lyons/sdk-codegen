@@ -24,24 +24,24 @@
 
  */
 
-import type { FC } from 'react'
-import React from 'react'
-import type { SpaceHelperProps } from '@looker/components'
-import { Space, IconButton } from '@looker/components'
-import { ChangeHistory } from '@styled-icons/material/ChangeHistory'
-import type { SpecItem } from '@looker/sdk-codegen'
+import type { FC } from 'react';
+import React from 'react';
+import type { SpaceHelperProps } from '@looker/components';
+import { IconButton, Space } from '@looker/components';
+import { ChangeHistory } from '@styled-icons/material/ChangeHistory';
+import type { SpecItem } from '@looker/sdk-codegen';
 
-import { Link } from '../Link'
-import { diffPath } from '../../utils'
-import { SdkLanguageSelector } from './SdkLanguageSelector'
-import { ApiSpecSelector } from './ApiSpecSelector'
+import { Link } from '../Link';
+import { diffPath, useNavigation } from '../../utils';
+import { SdkLanguageSelector } from './SdkLanguageSelector';
+import { ApiSpecSelector } from './ApiSpecSelector';
 
 interface SelectorContainerProps extends SpaceHelperProps {
   /** Current selected spec */
-  spec: SpecItem
+  spec: SpecItem;
 }
 
-export const HEADER_REM = 4
+export const HEADER_REM = 4;
 
 /**
  * Renders a container for selectors
@@ -49,17 +49,20 @@ export const HEADER_REM = 4
 export const SelectorContainer: FC<SelectorContainerProps> = ({
   spec,
   ...spaceProps
-}) => (
-  <Space width="auto" {...spaceProps}>
-    <SdkLanguageSelector />
-    <ApiSpecSelector spec={spec} />
-    <Link to={`/${diffPath}/${spec.key}/`}>
-      <IconButton
-        toggle
-        label="Compare Specifications"
-        icon={<ChangeHistory />}
-        size="small"
-      />
-    </Link>
-  </Space>
-)
+}) => {
+  const { buildPathWithGlobalParams } = useNavigation();
+  return (
+    <Space width="auto" {...spaceProps}>
+      <SdkLanguageSelector />
+      <ApiSpecSelector spec={spec} />
+      <Link to={buildPathWithGlobalParams(`/${spec.key}/${diffPath}`)}>
+        <IconButton
+          toggle
+          label="Compare Specifications"
+          icon={<ChangeHistory />}
+          size="small"
+        />
+      </Link>
+    </Space>
+  );
+};

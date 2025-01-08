@@ -23,19 +23,19 @@
  SOFTWARE.
 
  */
-import type { IMine, IFileCall } from './exampleInfo'
-import { permaLink } from './exampleInfo'
-import type { KeyedCollection } from './sdkModels'
+import type { IFileCall, IMine, SourceLink } from './exampleInfo';
+import { permaLink } from './exampleInfo';
+import type { KeyedCollection } from './sdkModels';
 
 /** All mined declaration data */
 export interface IDeclarationMine extends IMine {
-  types: DeclarationNuggets
-  methods: DeclarationNuggets
+  types: DeclarationNuggets;
+  methods: DeclarationNuggets;
 }
 
 export interface IDeclarationNugget extends IFileCall {}
 
-export type DeclarationNuggets = KeyedCollection<IDeclarationNugget>
+export type DeclarationNuggets = KeyedCollection<IDeclarationNugget>;
 
 /**
  * Searches for declaration of a given method or type and returns a GitHub
@@ -43,29 +43,30 @@ export type DeclarationNuggets = KeyedCollection<IDeclarationNugget>
  * @param lode All declaration data
  * @param methodId Method id to search for
  * @param typeId Type id to search for
+ * @param sourcerer Function to format source code link
  */
 export const findDeclaration = (
   lode: IDeclarationMine,
   methodId?: string,
-  typeId?: string
+  typeId?: string,
+  sourcerer: SourceLink = permaLink
 ) => {
-  let declaration
+  let declaration;
   if (methodId) {
-    declaration = lode.methods[methodId]
+    declaration = lode.methods[methodId];
   } else if (typeId) {
-    declaration = lode.types[typeId]
+    declaration = lode.types[typeId];
   }
 
-  let link
+  let link;
   if (declaration) {
-    // TODO make link configurable
-    link = permaLink(
+    link = sourcerer(
       lode.remoteOrigin,
       lode.commitHash,
       declaration.sourceFile,
       declaration.line
-    )
+    );
     // link = ideLink(parentPath, declaration.sourceFile, declaration.line)
   }
-  return { declaration, link }
-}
+  return { declaration, link };
+};

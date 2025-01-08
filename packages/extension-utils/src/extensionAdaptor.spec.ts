@@ -23,11 +23,11 @@
  SOFTWARE.
 
  */
-import type { IAPIMethods } from '@looker/sdk-rtl'
-import type { ExtensionSDK, LookerHostData } from '@looker/extension-sdk'
-import { ExtensionAdaptor } from './extensionAdaptor'
-import type { ThemeOverrides } from '@looker/extension-utils'
-import { getThemeOverrides } from '@looker/extension-utils'
+import type { IAPIMethods } from '@looker/sdk-rtl';
+import type { ExtensionSDK, LookerHostData } from '@looker/extension-sdk';
+import type { ThemeOverrides } from '@looker/extension-utils';
+import { getThemeOverrides } from '@looker/extension-utils';
+import { ExtensionAdaptor } from './extensionAdaptor';
 
 describe('ExtensionAdaptor', () => {
   test.each([
@@ -47,7 +47,37 @@ describe('ExtensionAdaptor', () => {
           } as ExtensionSDK,
           {} as IAPIMethods
         ).themeOverrides()
-      ).toEqual(expectedOverrides)
+      ).toEqual(expectedOverrides);
     }
-  )
-})
+  );
+
+  const adaptor = new ExtensionAdaptor(
+    {
+      lookerHostData: {} as Readonly<LookerHostData>,
+    } as ExtensionSDK,
+    {} as IAPIMethods
+  );
+
+  const mockClipboardWrite = jest
+    .fn()
+    .mockImplementation(() => Promise.resolve());
+  Object.assign(adaptor, {
+    extensionSdk: {
+      clipboardWrite: mockClipboardWrite,
+      lookerHostData: {
+        hostOrigin: 'https://self-signed.looker.com:9999',
+        extensionId: 'apix::api-explorer',
+      },
+    },
+  });
+
+  test('copies browser URL to clipboard', async () => {
+    jest.spyOn(adaptor.extensionSdk, 'clipboardWrite');
+    await adaptor.copyToClipboard(location);
+    const testHostData = adaptor.extensionSdk.lookerHostData;
+    const expectedClipboardContents = `${testHostData!.hostOrigin}/extensions/${
+      testHostData!.extensionId
+    }${location.pathname}${location.search}`;
+    expect(mockClipboardWrite).toHaveBeenCalledWith(expectedClipboardContents);
+  });
+});

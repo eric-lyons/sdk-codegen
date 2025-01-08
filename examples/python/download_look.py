@@ -7,7 +7,7 @@ Examples:
     $ python download_look.py "A simple look"
     $ python download_look.py "A simple look" 545 842 png
 
-Last modified: August 25, 2021
+Last modified: Feb 27 2024
 """
 
 import sys
@@ -15,7 +15,7 @@ import textwrap
 import time
 
 import looker_sdk
-from looker_sdk import models
+from looker_sdk import models40 as models
 
 sdk = looker_sdk.init40("../../looker.ini")
 
@@ -54,7 +54,7 @@ def download_look(look: models.Look, result_format: str, width: int, height: int
     task = sdk.create_look_render_task(id, result_format, width, height,)
 
     if not (task and task.id):
-        raise sdk_exceptions.RenderTaskError(
+        raise Exception(
             f"Could not create a render task for '{look.title}'"
         )
 

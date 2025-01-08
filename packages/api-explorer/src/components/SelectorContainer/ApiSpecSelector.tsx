@@ -24,33 +24,34 @@
 
  */
 
-import type { FC } from 'react'
-import React from 'react'
-import { Select } from '@looker/components'
-import { useHistory, useLocation } from 'react-router-dom'
-import type { SpecItem } from '@looker/sdk-codegen'
-import { useSelector } from 'react-redux'
+import type { FC } from 'react';
+import React from 'react';
+import { Select } from '@looker/components';
+import { useLocation } from 'react-router-dom';
+import type { SpecItem } from '@looker/sdk-codegen';
+import { useSelector } from 'react-redux';
+import { useNavigation } from '../../utils';
 
-import { selectSpecs } from '../../state'
+import { selectSpecs } from '../../state';
 
 interface ApiSpecSelectorProps {
-  spec: SpecItem
+  spec: SpecItem;
 }
 
 export const ApiSpecSelector: FC<ApiSpecSelectorProps> = ({ spec }) => {
-  const history = useHistory()
-  const location = useLocation()
-  const specs = useSelector(selectSpecs)
+  const location = useLocation();
+  const { navigate } = useNavigation();
+  const specs = useSelector(selectSpecs);
   const options = Object.entries(specs).map(([key, spec]) => ({
     value: key,
     label: key,
     description: spec.status,
-  }))
+  }));
 
   const handleChange = (specKey: string) => {
-    const matchPath = location.pathname.replace(`/${spec.key}`, `/${specKey}`)
-    history.push(matchPath)
-  }
+    const matchPath = location.pathname.replace(`/${spec.key}`, `/${specKey}`);
+    navigate(matchPath);
+  };
 
   return (
     <Select
@@ -60,5 +61,5 @@ export const ApiSpecSelector: FC<ApiSpecSelectorProps> = ({ spec }) => {
       options={options}
       onChange={handleChange}
     />
-  )
-}
+  );
+};

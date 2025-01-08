@@ -23,81 +23,99 @@
  SOFTWARE.
 
  */
-import React from 'react'
-import { Route } from 'react-router-dom'
-import { screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import React from 'react';
+import { Route } from 'react-router-dom';
+import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
-import { api } from '../../test-data'
-import { renderWithRouterAndReduxProvider } from '../../test-utils'
-import { TypeTagScene } from './TypeTagScene'
+import { api } from '../../test-data';
+import { renderWithRouterAndReduxProvider } from '../../test-utils';
+import { TypeTagScene } from './TypeTagScene';
 
-const opBtnNames = /ALL|SPECIFICATION|WRITE|REQUEST|ENUMERATED/
+const opBtnNames = /ALL|SPECIFICATION|WRITE|REQUEST|ENUMERATED/;
 
-const path = '/:specKey/types/:typeTag'
+const path = '/:specKey/types/:typeTag';
+const mockHistoryPush = jest.fn();
+jest.mock('react-router-dom', () => {
+  const ReactRouterDOM = jest.requireActual('react-router-dom');
+  return {
+    ...ReactRouterDOM,
+    useLocation: () => ({
+      pathname: '/4.0/types/Look',
+    }),
+    useHistory: () => ({
+      push: mockHistoryPush,
+      location: {
+        pathname: '/4.0/types/Look',
+      },
+    }),
+  };
+});
 
 describe('TypeTagScene', () => {
-  Element.prototype.scrollTo = jest.fn()
+  Element.prototype.scrollTo = jest.fn();
+  // const mockHistoryPush: jest.Mock = useHistory as jest.Mock
 
   test('it renders type buttons and all methods for a given type tag', () => {
     renderWithRouterAndReduxProvider(
       <Route path={path}>
         <TypeTagScene api={api} />
       </Route>,
-      ['/3.1/types/Dashboard']
-    )
+      ['/4.0/types/Dashboard']
+    );
     expect(
       screen.getAllByRole('button', {
         name: opBtnNames,
       })
-    ).toHaveLength(4)
+    ).toHaveLength(4);
     expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(
       Object.keys(api.typeTags.Dashboard).length
-    )
+    );
     expect(screen.getByText('DashboardBase').closest('a')).toHaveAttribute(
       'href',
-      '/3.1/types/Dashboard/DashboardBase'
-    )
-  })
+      '/4.0/types/Dashboard/DashboardBase'
+    );
+  });
 
   test('it only renders operation buttons for operations that exist under that tag', () => {
     renderWithRouterAndReduxProvider(
       <Route path={path}>
         <TypeTagScene api={api} />
       </Route>,
-      ['/3.1/types/DataAction']
-    )
+      ['/4.0/types/DataAction']
+    );
     expect(
       screen.getAllByRole('button', {
         name: opBtnNames,
       })
-    ).toHaveLength(2)
-  })
+    ).toHaveLength(2);
+  });
 
-  test('it filters methods by operation type', async () => {
+  test('it pushes filter to URL on toggle', async () => {
+    const site = '/4.0/types/Look';
     renderWithRouterAndReduxProvider(
       <Route path={path}>
         <TypeTagScene api={api} />
       </Route>,
-      ['/3.1/types/Look']
-    )
-    expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(
-      Object.keys(api.typeTags.Look).length
-    )
-
-    expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(
-      Object.keys(api.typeTags.Look).length
-    )
-
+      [site]
+    );
     /** Filter by SPECIFICATION */
-    userEvent.click(screen.getByRole('button', { name: 'SPECIFICATION' }))
+    await userEvent.click(
+      screen.getByRole('button', { name: 'SPECIFICATION' })
+    );
     await waitFor(() => {
-      expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(5)
-    })
+      expect(mockHistoryPush).toHaveBeenCalledWith({
+        pathname: site,
+        search: 't=specification',
+      });
+    });
     /** Filter by REQUEST */
-    userEvent.click(screen.getByRole('button', { name: 'REQUEST' }))
+    await userEvent.click(screen.getByRole('button', { name: 'REQUEST' }));
     await waitFor(() => {
-      expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(2)
-    })
-  })
-})
+      expect(mockHistoryPush).toHaveBeenCalledWith({
+        pathname: site,
+        search: 't=request',
+      });
+    });
+  });
+});

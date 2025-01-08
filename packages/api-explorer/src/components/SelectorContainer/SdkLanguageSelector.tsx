@@ -23,44 +23,39 @@
  SOFTWARE.
 
  */
-import type { FC } from 'react'
-import React from 'react'
-import { codeGenerators } from '@looker/sdk-codegen'
-import { Select } from '@looker/components'
-import { useSelector } from 'react-redux'
-import type { SelectOptionProps } from '@looker/components'
-
-import { useSettingActions, selectSdkLanguage } from '../../state'
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Select } from '@looker/components';
+import { useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
+import { selectSdkLanguage } from '../../state';
+import { allAlias, useNavigation } from '../../utils';
+import { allSdkLanguageOptions } from './utils';
 
 /**
  * Allows the user to select their preferred SDK language
  */
 export const SdkLanguageSelector: FC = () => {
-  const { setSdkLanguageAction } = useSettingActions()
-  const selectedSdkLanguage = useSelector(selectSdkLanguage)
+  const location = useLocation();
+  const { navigate } = useNavigation();
+  const selectedSdkLanguage = useSelector(selectSdkLanguage);
+  const [language, setLanguage] = useState(selectedSdkLanguage);
+  const options = allSdkLanguageOptions();
 
-  const allSdkLanguages: SelectOptionProps[] = codeGenerators.map((gen) => ({
-    value: gen.language,
-  }))
+  const handleChange = (alias: string) => {
+    navigate(location.pathname, { sdk: alias === allAlias ? null : alias });
+  };
 
-  allSdkLanguages.push({
-    options: [
-      {
-        value: 'All',
-      },
-    ],
-  })
-
-  const handleChange = (language: string) => {
-    setSdkLanguageAction({ sdkLanguage: language })
-  }
+  useEffect(() => {
+    setLanguage(selectedSdkLanguage);
+  }, [selectedSdkLanguage]);
 
   return (
     <Select
       aria-label="sdk language selector"
-      value={selectedSdkLanguage}
+      value={language}
       onChange={handleChange}
-      options={allSdkLanguages}
+      options={options}
     />
-  )
-}
+  );
+};

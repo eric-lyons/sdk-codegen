@@ -27,14 +27,17 @@ package com.looker.rtl
 import com.looker.sdk.AccessToken
 import java.security.MessageDigest
 import java.security.SecureRandom
-import java.util.Base64
+import java.util.*
 
 fun base64UrlEncode(bytes: ByteArray): String {
     return Base64.getUrlEncoder().encodeToString(bytes)
 }
 
 @ExperimentalUnsignedTypes
-class OAuthSession(override val apiSettings: ConfigurationProvider, override val transport: Transport = Transport(apiSettings)) :
+class OAuthSession(
+    override val apiSettings: ConfigurationProvider,
+    override val transport: Transport = Transport(apiSettings),
+) :
     AuthSession(apiSettings, transport) {
     private var random = SecureRandom()
     private var codeVerifier: String = ""
@@ -49,7 +52,7 @@ class OAuthSession(override val apiSettings: ConfigurationProvider, override val
             HttpMethod.POST,
             "/api/token",
             emptyMap(),
-            body
+            body,
         )
         val token = this.ok<AccessToken>(response)
         this.authToken.setToken(token)
@@ -66,8 +69,8 @@ class OAuthSession(override val apiSettings: ConfigurationProvider, override val
                         "grant_type" to "refresh_token",
                         "refresh_token" to this.activeToken().refreshToken,
                         "client_id" to config["client_id"],
-                        "redirect_uri" to config["redirect_uri"]
-                    )
+                        "redirect_uri" to config["redirect_uri"],
+                    ),
                 )
             }
         }
@@ -91,8 +94,8 @@ class OAuthSession(override val apiSettings: ConfigurationProvider, override val
                 "scope" to scope,
                 "state" to state,
                 "code_challenge_method" to "S256",
-                "code_challenge" to codeChallenge
-            )
+                "code_challenge" to codeChallenge,
+            ),
         )
     }
 
@@ -104,7 +107,7 @@ class OAuthSession(override val apiSettings: ConfigurationProvider, override val
             "code" to authCode,
             "code_verifier" to verifier,
             "client_id" to (config["client_id"] ?: error("")),
-            "redirect_uri" to (config["redirect_uri"] ?: error(""))
+            "redirect_uri" to (config["redirect_uri"] ?: error("")),
         )
     }
 

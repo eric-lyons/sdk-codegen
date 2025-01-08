@@ -24,8 +24,7 @@
 
  */
 
-export * from './ExtMarkdown'
-export * from './Header'
-export * from './Loading'
-export * from './Scroller'
-export * from './SideNav'
+export * from './Header';
+export * from './Loading';
+export * from './Scroller';
+export * from './SideNav';

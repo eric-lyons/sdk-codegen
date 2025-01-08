@@ -24,46 +24,49 @@
 
  */
 
-import React, { useEffect, useState } from 'react'
-import styled from 'styled-components'
-import { Accordion2, Heading } from '@looker/components'
-import type { MethodList } from '@looker/sdk-codegen'
-import { useSelector } from 'react-redux'
-import { useHistory, useRouteMatch } from 'react-router-dom'
-
-import { Link } from '../Link'
-import { buildMethodPath, highlightHTML } from '../../utils'
-import { selectSearchPattern } from '../../state'
+import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
+import { Accordion2, Heading } from '@looker/components';
+import type { MethodList } from '@looker/sdk-codegen';
+import { useSelector } from 'react-redux';
+import { useRouteMatch } from 'react-router-dom';
+import { buildMethodPath, highlightHTML, useNavigation } from '../../utils';
+import { Link } from '../Link';
+import { selectSearchPattern } from '../../state';
 
 interface MethodsProps {
-  methods: MethodList
-  tag: string
-  specKey: string
-  className?: string
-  defaultOpen?: boolean
+  methods: MethodList;
+  tag: string;
+  specKey: string;
+  className?: string;
+  defaultOpen?: boolean;
 }
 
 export const SideNavMethods = styled(
   ({ className, methods, tag, specKey, defaultOpen = false }: MethodsProps) => {
-    const searchPattern = useSelector(selectSearchPattern)
+    const { buildPathWithGlobalParams, navigateWithGlobalParams } =
+      useNavigation();
+    const searchPattern = useSelector(selectSearchPattern);
     const match = useRouteMatch<{ methodTag: string }>(
       `/:specKey/methods/:methodTag/:methodName?`
-    )
-    const [isOpen, setIsOpen] = useState(defaultOpen)
-    const history = useHistory()
-
+    );
+    const [isOpen, setIsOpen] = useState(defaultOpen);
     const handleOpen = () => {
-      const _isOpen = !isOpen
-      setIsOpen(_isOpen)
-      if (_isOpen) history.push(`/${specKey}/methods/${tag}`)
-    }
+      const _isOpen = !isOpen;
+      setIsOpen(_isOpen);
+      if (_isOpen) {
+        navigateWithGlobalParams(`/${specKey}/methods/${tag}`);
+      } else {
+        navigateWithGlobalParams(`/${specKey}/methods`);
+      }
+    };
 
     useEffect(() => {
       const status = match
         ? defaultOpen || match.params.methodTag === tag
-        : defaultOpen
-      setIsOpen(status)
-    }, [defaultOpen, match, tag])
+        : defaultOpen;
+      setIsOpen(status);
+    }, [defaultOpen]);
 
     /* TODO: Fix highlighting. It is applied but it is somehow being overridden */
     return (
@@ -78,16 +81,20 @@ export const SideNavMethods = styled(
         }
       >
         <ul>
-          {Object.values(methods).map((method) => (
+          {Object.values(methods).map(method => (
             <li key={method.name}>
-              <Link to={`${buildMethodPath(specKey, tag, method.name)}`}>
+              <Link
+                to={buildPathWithGlobalParams(
+                  buildMethodPath(specKey, tag, method.name)
+                )}
+              >
                 {highlightHTML(searchPattern, method.summary)}
               </Link>
             </li>
           ))}
         </ul>
       </Accordion2>
-    )
+    );
   }
 )`
   font-family: ${({ theme }) => theme.fonts.brand};
@@ -132,4 +139,4 @@ export const SideNavMethods = styled(
       background: ${({ theme }) => theme.colors.ui1};
     }
   }
-`
+`;

@@ -24,8 +24,8 @@
 
 import com.looker.rtl.AuthToken
 import com.looker.sdk.AccessToken
-import kotlin.test.assertEquals
 import org.junit.Test
+import kotlin.test.assertEquals
 
 class TestAuthToken {
     @Test
@@ -44,7 +44,7 @@ class TestAuthToken {
             accessToken = "all-access",
             tokenType = "backstage",
             expiresIn = 3600,
-            refreshToken = "refresh"
+            refreshToken = "refresh",
         )
 
         assertEquals(testToken.accessToken, "all-access")
@@ -59,7 +59,7 @@ class TestAuthToken {
         var actual = AuthToken(
             accessToken = "all-access",
             tokenType = "backstage",
-            expiresIn = 9
+            expiresIn = 9,
         )
 
         assertEquals(actual.accessToken, "all-access")
@@ -69,7 +69,7 @@ class TestAuthToken {
         actual = AuthToken(
             accessToken = "all-access",
             tokenType = "backstage",
-            expiresIn = 11
+            expiresIn = 11,
         )
 
         assertEquals(actual.expiresIn, 11)

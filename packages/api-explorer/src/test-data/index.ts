@@ -23,6 +23,7 @@
  SOFTWARE.
 
  */
-export * from './specs'
-export { examples } from './examples'
-export * from './declarations'
+export * from './specs';
+export { examples } from './examples';
+export * from './declarations';
+export * from './sdkLanguages';

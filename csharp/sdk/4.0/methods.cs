@@ -1,6 +1,6 @@
 /// MIT License
 ///
-/// Copyright (c) 2021 Looker Data Sciences, Inc.
+/// Copyright (c) 2023 Looker Data Sciences, Inc.
 ///
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,7 @@
 /// SOFTWARE.
 ///
 
-/// 437 API methods
+/// 467 API methods
 
 #nullable enable
 using System;
@@ -40,6 +40,36 @@ namespace Looker.SDK.API40
     public Looker40SDK(IAuthSession authSession): base(authSession, "4.0") { }
 
   #region Alert: Alert
+
+  /// Follow an alert.
+  ///
+  /// POST /alerts/{alert_id}/follow -> void
+  ///
+  /// <returns><c>void</c> Successfully followed an alert. ()</returns>
+  ///
+  /// <param name="alert_id">ID of an alert</param>
+  public async Task<SdkResponse<string, Exception>> follow_alert(
+    string alert_id,
+    ITransportSettings? options = null)
+{  
+      alert_id = SdkUtils.EncodeParam(alert_id);
+    return await AuthRequest<string, Exception>(HttpMethod.Post, $"/alerts/{alert_id}/follow", null,null,options);
+  }
+
+  /// Unfollow an alert.
+  ///
+  /// DELETE /alerts/{alert_id}/follow -> void
+  ///
+  /// <returns><c>void</c> Successfully unfollowed an alert. ()</returns>
+  ///
+  /// <param name="alert_id">ID of an alert</param>
+  public async Task<SdkResponse<string, Exception>> unfollow_alert(
+    string alert_id,
+    ITransportSettings? options = null)
+{  
+      alert_id = SdkUtils.EncodeParam(alert_id);
+    return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/alerts/{alert_id}/follow", null,null,options);
+  }
 
   /// ### Search Alerts
   ///
@@ -91,9 +121,10 @@ namespace Looker.SDK.API40
   ///
   /// <param name="alert_id">ID of an alert</param>
   public async Task<SdkResponse<Alert, Exception>> get_alert(
-    long alert_id,
+    string alert_id,
     ITransportSettings? options = null)
 {  
+      alert_id = SdkUtils.EncodeParam(alert_id);
     return await AuthRequest<Alert, Exception>(HttpMethod.Get, $"/alerts/{alert_id}", null,null,options);
   }
 
@@ -107,10 +138,11 @@ namespace Looker.SDK.API40
   ///
   /// <param name="alert_id">ID of an alert</param>
   public async Task<SdkResponse<Alert, Exception>> update_alert(
-    long alert_id,
+    string alert_id,
     WriteAlert body,
     ITransportSettings? options = null)
 {  
+      alert_id = SdkUtils.EncodeParam(alert_id);
     return await AuthRequest<Alert, Exception>(HttpMethod.Put, $"/alerts/{alert_id}", null,body,options);
   }
 
@@ -124,10 +156,11 @@ namespace Looker.SDK.API40
   ///
   /// <param name="alert_id">ID of an alert</param>
   public async Task<SdkResponse<Alert, Exception>> update_alert_field(
-    long alert_id,
+    string alert_id,
     AlertPatch body,
     ITransportSettings? options = null)
 {  
+      alert_id = SdkUtils.EncodeParam(alert_id);
     return await AuthRequest<Alert, Exception>(HttpMethod.Patch, $"/alerts/{alert_id}", null,body,options);
   }
 
@@ -139,9 +172,10 @@ namespace Looker.SDK.API40
   ///
   /// <param name="alert_id">ID of an alert</param>
   public async Task<SdkResponse<string, Exception>> delete_alert(
-    long alert_id,
+    string alert_id,
     ITransportSettings? options = null)
 {  
+      alert_id = SdkUtils.EncodeParam(alert_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/alerts/{alert_id}", null,null,options);
   }
 
@@ -201,12 +235,48 @@ namespace Looker.SDK.API40
   /// <param name="alert_id">ID of an alert</param>
   /// <param name="force">Whether to enqueue an alert again if its already running.</param>
   public async Task<SdkResponse<string, Exception>> enqueue_alert(
-    long alert_id,
+    string alert_id,
     bool? force = null,
     ITransportSettings? options = null)
 {  
+      alert_id = SdkUtils.EncodeParam(alert_id);
     return await AuthRequest<string, Exception>(HttpMethod.Post, $"/alerts/{alert_id}/enqueue", new Values {
       { "force", force }},null,options);
+  }
+
+  /// # Alert Notifications.
+  ///   The endpoint returns all the alert notifications received by the user on email in the past 7 days. It also returns whether the notifications have been read by the user.
+  ///
+  /// GET /alert_notifications -> AlertNotifications[]
+  ///
+  /// <returns><c>AlertNotifications[]</c> It shows all the alert notifications received by the user on email. (application/json)</returns>
+  ///
+  /// <param name="limit">(Optional) Number of results to return (used with `offset`).</param>
+  /// <param name="offset">(Optional) Number of results to skip before returning any (used with `limit`).</param>
+  public async Task<SdkResponse<AlertNotifications[], Exception>> alert_notifications(
+    long? limit = null,
+    long? offset = null,
+    ITransportSettings? options = null)
+{  
+    return await AuthRequest<AlertNotifications[], Exception>(HttpMethod.Get, "/alert_notifications", new Values {
+      { "limit", limit },
+      { "offset", offset }},null,options);
+  }
+
+  /// # Reads a Notification
+  ///   The endpoint marks a given alert notification as read by the user, in case it wasn't already read. The AlertNotification model is updated for this purpose. It returns the notification as a response.
+  ///
+  /// PATCH /alert_notifications/{alert_notification_id} -> AlertNotifications
+  ///
+  /// <returns><c>AlertNotifications</c> It updates that the given alert notification has been read by the user (application/json)</returns>
+  ///
+  /// <param name="alert_notification_id">ID of a notification</param>
+  public async Task<SdkResponse<AlertNotifications, Exception>> read_alert_notification(
+    string alert_notification_id,
+    ITransportSettings? options = null)
+{  
+      alert_notification_id = SdkUtils.EncodeParam(alert_notification_id);
+    return await AuthRequest<AlertNotifications, Exception>(HttpMethod.Patch, $"/alert_notifications/{alert_notification_id}", null,null,options);
   }
 
   #endregion Alert: Alert
@@ -215,9 +285,9 @@ namespace Looker.SDK.API40
 
   /// ### Present client credentials to obtain an authorization token
   ///
-  /// Looker API implements the OAuth2 [Resource Owner Password Credentials Grant](https://looker.com/docs/r/api/outh2_resource_owner_pc) pattern.
-  /// The client credentials required for this login must be obtained by creating an API3 key on a user account
-  /// in the Looker Admin console. The API3 key consists of a public `client_id` and a private `client_secret`.
+  /// Looker API implements the OAuth2 [Resource Owner Password Credentials Grant](https://cloud.google.com/looker/docs/r/api/outh2_resource_owner_pc) pattern.
+  /// The client credentials required for this login must be obtained by creating an API key on a user account
+  /// in the Looker Admin console. The API key consists of a public `client_id` and a private `client_secret`.
   ///
   /// The access token returned by `login` must be used in the HTTP Authorization header of subsequent
   /// API requests, like this:
@@ -240,14 +310,14 @@ namespace Looker.SDK.API40
   /// ### Best Practice:
   /// Always pass credentials in body params. Pass credentials in URL query params **only** when you cannot pass body params due to application, tool, or other limitations.
   ///
-  /// For more information and detailed examples of Looker API authorization, see [How to Authenticate to Looker API3](https://github.com/looker/looker-sdk-ruby/blob/master/authentication.md).
+  /// For more information and detailed examples of Looker API authorization, see [How to Authenticate to Looker API](https://github.com/looker/looker-sdk-ruby/blob/master/authentication.md).
   ///
   /// POST /login -> AccessToken
   ///
   /// <returns><c>AccessToken</c> Access token with metadata. (application/json)</returns>
   ///
-  /// <param name="client_id">client_id part of API3 Key.</param>
-  /// <param name="client_secret">client_secret part of API3 Key.</param>
+  /// <param name="client_id">client_id part of API Key.</param>
+  /// <param name="client_secret">client_secret part of API Key.</param>
   public async Task<SdkResponse<AccessToken, Exception>> login(
     string? client_id = null,
     string? client_secret = null,
@@ -275,6 +345,8 @@ namespace Looker.SDK.API40
   ///
   /// See 'login' for more detail on the access token and how to use it.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// POST /login/{user_id} -> AccessToken
   ///
   /// <returns><c>AccessToken</c> Access token with metadata. (application/json)</returns>
@@ -282,10 +354,11 @@ namespace Looker.SDK.API40
   /// <param name="user_id">Id of user.</param>
   /// <param name="associative">When true (default), API calls using the returned access_token are attributed to the admin user who created the access_token. When false, API activity is attributed to the user the access_token runs as. False requires a looker license.</param>
   public async Task<SdkResponse<AccessToken, Exception>> login_user(
-    long user_id,
+    string user_id,
     bool? associative = null,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<AccessToken, Exception>(HttpMethod.Post, $"/login/{user_id}", new Values {
       { "associative", associative }},null,options);
   }
@@ -304,11 +377,245 @@ namespace Looker.SDK.API40
 
   #endregion ApiAuth: API Authentication
 
+  #region Artifact: Artifact Storage
+
+  /// Get the maximum configured size of the entire artifact store, and the currently used storage in bytes.
+  ///
+  /// **Note**: The artifact storage API can only be used by Looker-built extensions.
+  ///
+  /// GET /artifact/usage -> ArtifactUsage
+  ///
+  /// <returns><c>ArtifactUsage</c> Artifact store statistics (application/json)</returns>
+  ///
+  /// <param name="fields">Comma-delimited names of fields to return in responses. Omit for all fields</param>
+  public async Task<SdkResponse<ArtifactUsage, Exception>> artifact_usage(
+    string? fields = null,
+    ITransportSettings? options = null)
+{  
+    return await AuthRequest<ArtifactUsage, Exception>(HttpMethod.Get, "/artifact/usage", new Values {
+      { "fields", fields }},null,options);
+  }
+
+  /// Get all artifact namespaces and the count of artifacts in each namespace
+  ///
+  /// **Note**: The artifact storage API can only be used by Looker-built extensions.
+  ///
+  /// GET /artifact/namespaces -> ArtifactNamespace[]
+  ///
+  /// <returns><c>ArtifactNamespace[]</c> Artifact store namespace counts (application/json)</returns>
+  ///
+  /// <param name="fields">Comma-delimited names of fields to return in responses. Omit for all fields</param>
+  /// <param name="limit">Number of results to return. (used with offset)</param>
+  /// <param name="offset">Number of results to skip before returning any. (used with limit)</param>
+  public async Task<SdkResponse<ArtifactNamespace[], Exception>> artifact_namespaces(
+    string? fields = null,
+    long? limit = null,
+    long? offset = null,
+    ITransportSettings? options = null)
+{  
+    return await AuthRequest<ArtifactNamespace[], Exception>(HttpMethod.Get, "/artifact/namespaces", new Values {
+      { "fields", fields },
+      { "limit", limit },
+      { "offset", offset }},null,options);
+  }
+
+  /// ### Return the value of an artifact
+  ///
+  /// The MIME type for the API response is set to the `content_type` of the value
+  ///
+  /// **Note**: The artifact storage API can only be used by Looker-built extensions.
+  ///
+  /// GET /artifact/{namespace}/value -> string
+  ///
+  /// <returns><c>string</c> Artifact value (application/json)</returns>
+  ///
+  /// <param name="namespace">Artifact storage namespace</param>
+  /// <param name="key">Artifact storage key. Namespace + Key must be unique</param>
+  public async Task<SdkResponse<string, Exception>> artifact_value(
+    string @namespace,
+    string? key = null,
+    ITransportSettings? options = null)
+{  
+      namespace = SdkUtils.EncodeParam(namespace);
+    return await AuthRequest<string, Exception>(HttpMethod.Get, $"/artifact/{namespace}/value", new Values {
+      { "key", key }},null,options);
+  }
+
+  /// Remove *all* artifacts from a namespace. Purged artifacts are permanently deleted
+  ///
+  /// **Note**: The artifact storage API can only be used by Looker-built extensions.
+  ///
+  /// DELETE /artifact/{namespace}/purge -> void
+  ///
+  /// <returns><c>void</c> All artifacts are purged. ()</returns>
+  ///
+  /// <param name="namespace">Artifact storage namespace</param>
+  public async Task<SdkResponse<string, Exception>> purge_artifacts(
+    string @namespace,
+    ITransportSettings? options = null)
+{  
+      namespace = SdkUtils.EncodeParam(namespace);
+    return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/artifact/{namespace}/purge", null,null,options);
+  }
+
+  /// ### Search all key/value pairs in a namespace for matching criteria.
+  ///
+  /// Returns an array of artifacts matching the specified search criteria.
+  ///
+  /// Key search patterns use case-insensitive matching and can contain `%` and `_` as SQL LIKE pattern match wildcard expressions.
+  ///
+  /// The parameters `min_size` and `max_size` can be used individually or together.
+  ///
+  /// - `min_size` finds artifacts with sizes greater than or equal to its value
+  /// - `max_size` finds artifacts with sizes less than or equal to its value
+  /// - using both parameters restricts the minimum and maximum size range for artifacts
+  ///
+  /// **NOTE**: Artifacts are always returned in alphanumeric order by key.
+  ///
+  /// Get a **single artifact** by namespace and key with [`artifact`](#!/Artifact/artifact)
+  ///
+  /// **Note**: The artifact storage API can only be used by Looker-built extensions.
+  ///
+  /// GET /artifact/{namespace}/search -> Artifact[]
+  ///
+  /// <returns><c>Artifact[]</c> Artifacts (application/json)</returns>
+  ///
+  /// <param name="namespace">Artifact storage namespace</param>
+  /// <param name="fields">Comma-delimited names of fields to return in responses. Omit for all fields</param>
+  /// <param name="key">Key pattern to match</param>
+  /// <param name="user_ids">Ids of users who created or updated the artifact (comma-delimited list)</param>
+  /// <param name="min_size">Minimum storage size of the artifact</param>
+  /// <param name="max_size">Maximum storage size of the artifact</param>
+  /// <param name="limit">Number of results to return. (used with offset)</param>
+  /// <param name="offset">Number of results to skip before returning any. (used with limit)</param>
+  public async Task<SdkResponse<Artifact[], Exception>> search_artifacts(
+    string @namespace,
+    string? fields = null,
+    string? key = null,
+    string? user_ids = null,
+    long? min_size = null,
+    long? max_size = null,
+    long? limit = null,
+    long? offset = null,
+    ITransportSettings? options = null)
+{  
+      namespace = SdkUtils.EncodeParam(namespace);
+    return await AuthRequest<Artifact[], Exception>(HttpMethod.Get, $"/artifact/{namespace}/search", new Values {
+      { "fields", fields },
+      { "key", key },
+      { "user_ids", user_ids },
+      { "min_size", min_size },
+      { "max_size", max_size },
+      { "limit", limit },
+      { "offset", offset }},null,options);
+  }
+
+  /// ### Get one or more artifacts
+  ///
+  /// Returns an array of artifacts matching the specified key value(s).
+  ///
+  /// **Note**: The artifact storage API can only be used by Looker-built extensions.
+  ///
+  /// GET /artifact/{namespace} -> Artifact[]
+  ///
+  /// <returns><c>Artifact[]</c> Created or updated artifacts (application/json)</returns>
+  ///
+  /// <param name="namespace">Artifact storage namespace</param>
+  /// <param name="key">Comma-delimited list of keys. Wildcards not allowed.</param>
+  /// <param name="fields">Comma-delimited names of fields to return in responses. Omit for all fields</param>
+  /// <param name="limit">Number of results to return. (used with offset)</param>
+  /// <param name="offset">Number of results to skip before returning any. (used with limit)</param>
+  public async Task<SdkResponse<Artifact[], Exception>> artifact(
+    string @namespace,
+    string key,
+    string? fields = null,
+    long? limit = null,
+    long? offset = null,
+    ITransportSettings? options = null)
+{  
+      namespace = SdkUtils.EncodeParam(namespace);
+    return await AuthRequest<Artifact[], Exception>(HttpMethod.Get, $"/artifact/{namespace}", new Values {
+      { "key", key },
+      { "fields", fields },
+      { "limit", limit },
+      { "offset", offset }},null,options);
+  }
+
+  /// ### Delete one or more artifacts
+  ///
+  /// To avoid rate limiting on deletion requests, multiple artifacts can be deleted at the same time by using a comma-delimited list of artifact keys.
+  ///
+  /// **Note**: The artifact storage API can only be used by Looker-built extensions.
+  ///
+  /// DELETE /artifact/{namespace} -> void
+  ///
+  /// <returns><c>void</c> The artifact is deleted. ()</returns>
+  ///
+  /// <param name="namespace">Artifact storage namespace</param>
+  /// <param name="key">Comma-delimited list of keys. Wildcards not allowed.</param>
+  public async Task<SdkResponse<string, Exception>> delete_artifact(
+    string @namespace,
+    string key,
+    ITransportSettings? options = null)
+{  
+      namespace = SdkUtils.EncodeParam(namespace);
+    return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/artifact/{namespace}", new Values {
+      { "key", key }},null,options);
+  }
+
+  /// ### Create or update one or more artifacts
+  ///
+  /// Only `key` and `value` are required to _create_ an artifact.
+  /// To _update_ an artifact, its current `version` value must be provided.
+  ///
+  /// In the following example `body` payload, `one` and `two` are existing artifacts, and `three` is new:
+  ///
+  /// ```json
+  /// [
+  ///   { "key": "one", "value": "[ \"updating\", \"existing\", \"one\" ]", "version": 10, "content_type": "application/json" },
+  ///   { "key": "two", "value": "updating existing two", "version": 20 },
+  ///   { "key": "three", "value": "creating new three" },
+  /// ]
+  /// ```
+  ///
+  /// Notes for this body:
+  ///
+  /// - The `value` for `key` **one** is a JSON payload, so a `content_type` override is needed. This override must be done **every** time a JSON value is set.
+  /// - The `version` values for **one** and **two** mean they have been saved 10 and 20 times, respectively.
+  /// - If `version` is **not** provided for an existing artifact, the entire request will be refused and a `Bad Request` response will be sent.
+  /// - If `version` is provided for an artifact, it is only used for helping to prevent inadvertent data overwrites. It cannot be used to **set** the version of an artifact. The Looker server controls `version`.
+  /// - We suggest encoding binary values as base64. Because the MIME content type for base64 is detected as plain text, also provide `content_type` to correctly indicate the value's type for retrieval and client-side processing.
+  ///
+  /// Because artifacts are stored encrypted, the same value can be written multiple times (provided the correct `version` number is used). Looker does not examine any values stored in the artifact store, and only decrypts when sending artifacts back in an API response.
+  ///
+  /// **Note**: The artifact storage API can only be used by Looker-built extensions.
+  ///
+  /// PUT /artifacts/{namespace} -> Artifact[]
+  ///
+  /// <returns><c>Artifact[]</c> Created or updated artifacts (application/json)</returns>
+  ///
+  /// <param name="namespace">Artifact storage namespace</param>
+  /// <param name="fields">Comma-delimited names of fields to return in responses. Omit for all fields</param>
+  public async Task<SdkResponse<Artifact[], Exception>> update_artifacts(
+    string @namespace,
+    UpdateArtifact[] body,
+    string? fields = null,
+    ITransportSettings? options = null)
+{  
+      namespace = SdkUtils.EncodeParam(namespace);
+    return await AuthRequest<Artifact[], Exception>(HttpMethod.Put, $"/artifacts/{namespace}", new Values {
+      { "fields", fields }},body,options);
+  }
+
+  #endregion Artifact: Artifact Storage
+
   #region Auth: Manage User Authentication Configuration
 
   /// ### Create an embed secret using the specified information.
   ///
   /// The value of the `secret` field will be set by Looker and returned.
+  ///
+  /// Calls to this endpoint require [Embedding](https://cloud.google.com/looker/docs/r/looker-core-feature-embed) to be enabled
   ///
   /// POST /embed_config/secrets -> EmbedSecret
   ///
@@ -323,56 +630,69 @@ namespace Looker.SDK.API40
 
   /// ### Delete an embed secret.
   ///
+  /// Calls to this endpoint require [Embedding](https://cloud.google.com/looker/docs/r/looker-core-feature-embed) to be enabled
+  ///
   /// DELETE /embed_config/secrets/{embed_secret_id} -> string
   ///
   /// <returns><c>string</c> Successfully deleted. (application/json)</returns>
   ///
   /// <param name="embed_secret_id">Id of Embed Secret</param>
   public async Task<SdkResponse<string, Exception>> delete_embed_secret(
-    long embed_secret_id,
+    string embed_secret_id,
     ITransportSettings? options = null)
 {  
+      embed_secret_id = SdkUtils.EncodeParam(embed_secret_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/embed_config/secrets/{embed_secret_id}", null,null,options);
   }
 
-  /// ### Create SSO Embed URL
+  /// ### Create Signed Embed URL
   ///
-  /// Creates an SSO embed URL and cryptographically signs it with an embed secret.
+  /// Creates a signed embed URL and cryptographically signs it with an embed secret.
   /// This signed URL can then be used to instantiate a Looker embed session in a PBL web application.
-  /// Do not make any modifications to this URL - any change may invalidate the signature and
+  /// Do not make any modifications to the returned URL - any change may invalidate the signature and
   /// cause the URL to fail to load a Looker embed session.
   ///
-  /// A signed SSO embed URL can only be used once. After it has been used to request a page from the
-  /// Looker server, the URL is invalid. Future requests using the same URL will fail. This is to prevent
+  /// A signed embed URL can only be **used once**. After the URL has been used to request a page from the
+  /// Looker server, it is invalid. Future requests using the same URL will fail. This is to prevent
   /// 'replay attacks'.
   ///
   /// The `target_url` property must be a complete URL of a Looker UI page - scheme, hostname, path and query params.
   /// To load a dashboard with id 56 and with a filter of `Date=1 years`, the looker URL would look like `https:/myname.looker.com/dashboards/56?Date=1%20years`.
-  /// The best way to obtain this target_url is to navigate to the desired Looker page in your web browser,
-  /// copy the URL shown in the browser address bar and paste it into the `target_url` property as a quoted string value in this API request.
+  /// The best way to obtain this `target_url` is to navigate to the desired Looker page in your web browser and use the "Get embed URL" menu option
+  /// to copy it to your clipboard and paste it into the `target_url` property as a quoted string value in this API request.
   ///
-  /// Permissions for the embed user are defined by the groups in which the embed user is a member (group_ids property)
+  /// Permissions for the embed user are defined by the groups in which the embed user is a member (`group_ids` property)
   /// and the lists of models and permissions assigned to the embed user.
-  /// At a minimum, you must provide values for either the group_ids property, or both the models and permissions properties.
+  /// At a minimum, you must provide values for either the `group_ids` property, or **both** the models and permissions properties.
   /// These properties are additive; an embed user can be a member of certain groups AND be granted access to models and permissions.
   ///
-  /// The embed user's access is the union of permissions granted by the group_ids, models, and permissions properties.
+  /// The embed user's access is the union of permissions granted by the `group_ids`, `models`, and `permissions` properties.
   ///
   /// This function does not strictly require all group_ids, user attribute names, or model names to exist at the moment the
-  /// SSO embed url is created. Unknown group_id, user attribute names or model names will be passed through to the output URL.
-  /// To diagnose potential problems with an SSO embed URL, you can copy the signed URL into the Embed URI Validator text box in `<your looker instance>/admin/embed`.
+  /// embed url is created. Unknown group_id, user attribute names or model names will be passed through to the output URL.
+  /// Because of this, **these parameters are not validated** when the API call is made.
+  ///
+  /// The [Get Embed Url](https://cloud.google.com/looker/docs/r/get-signed-url) dialog can be used to determine and validate the correct permissions for signing an embed url.
+  /// This dialog also provides the SDK syntax for the API call to make. Alternatively, you can copy the signed URL into the Embed URI Validator text box
+  /// in `<your looker instance>/admin/embed` to diagnose potential problems.
   ///
   /// The `secret_id` parameter is optional. If specified, its value must be the id of an active secret defined in the Looker instance.
-  /// if not specified, the URL will be signed using the newest active secret defined in the Looker instance.
+  /// if not specified, the URL will be signed using the most recent active signing secret. If there is no active secret for signing embed urls,
+  /// a default secret will be created. This default secret is encrypted using HMAC/SHA-256.
+  ///
+  /// The `embed_domain` parameter is optional. If specified and valid, the domain will be added to the embed domain allowlist if it is missing.
   ///
   /// #### Security Note
   /// Protect this signed URL as you would an access token or password credentials - do not write
   /// it to disk, do not pass it to a third party, and only pass it through a secure HTTPS
   /// encrypted transport.
   ///
+  ///
+  /// Calls to this endpoint require [Embedding](https://cloud.google.com/looker/docs/r/looker-core-feature-embed) to be enabled
+  ///
   /// POST /embed/sso_url -> EmbedUrlResponse
   ///
-  /// <returns><c>EmbedUrlResponse</c> Signed SSO URL (application/json)</returns>
+  /// <returns><c>EmbedUrlResponse</c> Signed Embed URL (application/json)</returns>
   ///
   public async Task<SdkResponse<EmbedUrlResponse, Exception>> create_sso_embed_url(
     EmbedSsoParams body,
@@ -387,8 +707,8 @@ namespace Looker.SDK.API40
   /// This embed URL can then be used to instantiate a Looker embed session in a
   /// "Powered by Looker" (PBL) web application.
   ///
-  /// This is similar to Private Embedding (https://docs.looker.com/r/admin/embed/private-embed). Instead of
-  /// of logging into the Web UI to authenticate, the user has already authenticated against the API to be able to
+  /// This is similar to Private Embedding (https://cloud.google.com/looker/docs/r/admin/embed/private-embed). Instead of
+  /// logging into the Web UI to authenticate, the user has already authenticated against the API to be able to
   /// make this call. However, unlike Private Embed where the user has access to any other part of the Looker UI,
   /// the embed web session created by requesting the EmbedUrlResponse.url in a browser only has access to
   /// content visible under the `/embed` context.
@@ -403,9 +723,12 @@ namespace Looker.SDK.API40
   /// copy the URL shown in the browser address bar, insert "/embed" after the host/port, and paste it into the `target_url` property as a quoted string value in this API request.
   ///
   /// #### Security Note
-  /// Protect this embed URL as you would an access token or password credentials - do not write
+  /// Protect this signed URL as you would an access token or password credentials - do not write
   /// it to disk, do not pass it to a third party, and only pass it through a secure HTTPS
   /// encrypted transport.
+  ///
+  ///
+  /// Calls to this endpoint require [Embedding](https://cloud.google.com/looker/docs/r/looker-core-feature-embed) to be enabled
   ///
   /// POST /embed/token_url/me -> EmbedUrlResponse
   ///
@@ -418,6 +741,114 @@ namespace Looker.SDK.API40
     return await AuthRequest<EmbedUrlResponse, Exception>(HttpMethod.Post, "/embed/token_url/me", null,body,options);
   }
 
+  /// ### Validate a Signed Embed URL
+  ///
+  /// GET /embed/sso/validate -> EmbedUrlResponse
+  ///
+  /// <returns><c>EmbedUrlResponse</c> Embed URL Validation (application/json)</returns>
+  ///
+  /// <param name="url">URL to validate</param>
+  public async Task<SdkResponse<EmbedUrlResponse, Exception>> validate_embed_url(
+    string? url = null,
+    ITransportSettings? options = null)
+{  
+    return await AuthRequest<EmbedUrlResponse, Exception>(HttpMethod.Get, "/embed/sso/validate", new Values {
+      { "url", url }},null,options);
+  }
+
+  /// ### Acquire a cookieless embed session.
+  ///
+  /// The acquire session endpoint negates the need for signing the embed url and passing it as a parameter
+  /// to the embed login. This endpoint accepts an embed user definition and creates or updates it. This is
+  /// similar behavior to the embed SSO login as they both can create and update embed user data.
+  ///
+  /// The endpoint also accepts an optional `session_reference_token`. If present and the session has not expired
+  /// and the credentials match the credentials for the embed session, a new authentication token will be
+  /// generated. This allows the embed session to attach a new embedded IFRAME to the embed session. Note that
+  /// the session is NOT extended in this scenario. In other words the session_length parameter is ignored.
+  ///
+  /// **IMPORTANT:** If the `session_reference_token` is provided and the session has NOT expired, the embed user
+  /// is NOT updated. This is done for performance reasons and to support the embed SSO usecase where the
+  /// first IFRAME created on a page uses a signed url and subsequently created IFRAMEs do not.
+  ///
+  /// If the `session_reference_token` is provided but the session has expired, the token will be ignored and a
+  /// new embed session will be created. Note that the embed user definition will be updated in this scenario.
+  ///
+  /// If the credentials do not match the credentials associated with an existing session_reference_token, a
+  /// 404 will be returned.
+  ///
+  /// The endpoint returns the following:
+  /// - Authentication token - a token that is passed to `/embed/login` endpoint that creates or attaches to the
+  ///   embed session. This token can be used once and has a lifetime of 30 seconds.
+  /// - Session reference token - a token that lives for the length of the session. This token is used to
+  ///   generate new api and navigation tokens OR create new embed IFRAMEs.
+  /// - Api token - lives for 10 minutes. The Looker client will ask for this token once it is loaded into the
+  ///   iframe.
+  /// - Navigation token - lives for 10 minutes. The Looker client will ask for this token once it is loaded into
+  ///   the iframe.
+  ///
+  /// Calls to this endpoint require [Embedding](https://cloud.google.com/looker/docs/r/looker-core-feature-embed) to be enabled
+  ///
+  /// POST /embed/cookieless_session/acquire -> EmbedCookielessSessionAcquireResponse
+  ///
+  /// <returns><c>EmbedCookielessSessionAcquireResponse</c> Embed cookieless acquire session response (application/json)</returns>
+  ///
+  public async Task<SdkResponse<EmbedCookielessSessionAcquireResponse, Exception>> acquire_embed_cookieless_session(
+    EmbedCookielessSessionAcquire body,
+    ITransportSettings? options = null)
+{  
+    return await AuthRequest<EmbedCookielessSessionAcquireResponse, Exception>(HttpMethod.Post, "/embed/cookieless_session/acquire", null,body,options);
+  }
+
+  /// ### Delete cookieless embed session
+  ///
+  /// This will delete the session associated with the given session reference token. Calling this endpoint will result
+  /// in the session and session reference data being cleared from the system. This endpoint can be used to log an embed
+  /// user out of the Looker instance.
+  ///
+  /// Calls to this endpoint require [Embedding](https://cloud.google.com/looker/docs/r/looker-core-feature-embed) to be enabled
+  ///
+  /// DELETE /embed/cookieless_session/{session_reference_token} -> string
+  ///
+  /// <returns><c>string</c> Successfully deleted. (application/json)</returns>
+  ///
+  /// <param name="session_reference_token">Embed session reference token</param>
+  public async Task<SdkResponse<string, Exception>> delete_embed_cookieless_session(
+    string session_reference_token,
+    ITransportSettings? options = null)
+{  
+      session_reference_token = SdkUtils.EncodeParam(session_reference_token);
+    return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/embed/cookieless_session/{session_reference_token}", null,null,options);
+  }
+
+  /// ### Generate api and navigation tokens for a cookieless embed session
+  ///
+  /// The generate tokens endpoint is used to create new tokens of type:
+  /// - Api token.
+  /// - Navigation token.
+  /// The generate tokens endpoint should be called every time the Looker client asks for a token (except for the
+  /// first time when the tokens returned by the acquire_session endpoint should be used).
+  ///
+  /// #### Embed session expiration handling
+  ///
+  /// This endpoint does NOT return an error when the embed session expires. This is to simplify processing
+  /// in the caller as errors can happen for non session expiration reasons. Instead the endpoint returns
+  /// the session time to live in the `session_reference_token_ttl` response property. If this property
+  /// contains a zero, the embed session has expired.
+  ///
+  /// Calls to this endpoint require [Embedding](https://cloud.google.com/looker/docs/r/looker-core-feature-embed) to be enabled
+  ///
+  /// PUT /embed/cookieless_session/generate_tokens -> EmbedCookielessSessionGenerateTokensResponse
+  ///
+  /// <returns><c>EmbedCookielessSessionGenerateTokensResponse</c> Generated api and navigations tokens for the cookieless embed session. (application/json)</returns>
+  ///
+  public async Task<SdkResponse<EmbedCookielessSessionGenerateTokensResponse, Exception>> generate_tokens_for_cookieless_session(
+    EmbedCookielessSessionGenerateTokens body,
+    ITransportSettings? options = null)
+{  
+    return await AuthRequest<EmbedCookielessSessionGenerateTokensResponse, Exception>(HttpMethod.Put, "/embed/cookieless_session/generate_tokens", null,body,options);
+  }
+
   /// ### Get the LDAP configuration.
   ///
   /// Looker can be optionally configured to authenticate users against an Active Directory or other LDAP directory server.
@@ -427,13 +858,15 @@ namespace Looker.SDK.API40
   ///
   /// Configuring LDAP impacts authentication for all users. This configuration should be done carefully.
   ///
-  /// Looker maintains a single LDAP configuration. It can be read and updated.       Updates only succeed if the new state will be valid (in the sense that all required fields are populated);       it is up to you to ensure that the configuration is appropriate and correct).
+  /// Looker maintains a single LDAP configuration. It can be read and updated. Updates only succeed if the new state will be valid (in the sense that all required fields are populated); it is up to you to ensure that the configuration is appropriate and correct).
   ///
   /// LDAP is enabled or disabled for Looker using the **enabled** field.
   ///
   /// Looker will never return an **auth_password** field. That value can be set, but never retrieved.
   ///
-  /// See the [Looker LDAP docs](https://www.looker.com/docs/r/api/ldap_setup) for additional information.
+  /// See the [Looker LDAP docs](https://cloud.google.com/looker/docs/r/api/ldap_setup) for additional information.
+  ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
   ///
   /// GET /ldap_config -> LDAPConfig
   ///
@@ -455,7 +888,9 @@ namespace Looker.SDK.API40
   ///
   /// It is **highly** recommended that any LDAP setting changes be tested using the APIs below before being set globally.
   ///
-  /// See the [Looker LDAP docs](https://www.looker.com/docs/r/api/ldap_setup) for additional information.
+  /// See the [Looker LDAP docs](https://cloud.google.com/looker/docs/r/api/ldap_setup) for additional information.
+  ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
   ///
   /// PATCH /ldap_config -> LDAPConfig
   ///
@@ -487,6 +922,8 @@ namespace Looker.SDK.API40
   ///
   /// The active LDAP settings are not modified.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// PUT /ldap_config/test_connection -> LDAPConfigTestResult
   ///
   /// <returns><c>LDAPConfigTestResult</c> Result info. (application/json)</returns>
@@ -500,9 +937,9 @@ namespace Looker.SDK.API40
 
   /// ### Test the connection authentication settings for an LDAP configuration.
   ///
-  /// This tests that the connection is possible and that a 'server' account to be used by Looker can       authenticate to the LDAP server given connection and authentication information.
+  /// This tests that the connection is possible and that a 'server' account to be used by Looker can authenticate to the LDAP server given connection and authentication information.
   ///
-  /// **connection_host**, **connection_port**, and **auth_username**, are required.       **connection_tls** and **auth_password** are optional.
+  /// **connection_host**, **connection_port**, and **auth_username**, are required. **connection_tls** and **auth_password** are optional.
   ///
   /// Example:
   /// ```json
@@ -515,9 +952,11 @@ namespace Looker.SDK.API40
   /// }
   /// ```
   ///
-  /// Looker will never return an **auth_password**. If this request omits the **auth_password** field, then       the **auth_password** value from the active config (if present) will be used for the test.
+  /// Looker will never return an **auth_password**. If this request omits the **auth_password** field, then the **auth_password** value from the active config (if present) will be used for the test.
   ///
   /// The active LDAP settings are not modified.
+  ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
   ///
   /// PUT /ldap_config/test_auth -> LDAPConfigTestResult
   ///
@@ -532,13 +971,15 @@ namespace Looker.SDK.API40
 
   /// ### Test the user authentication settings for an LDAP configuration without authenticating the user.
   ///
-  /// This test will let you easily test the mapping for user properties and roles for any user without      needing to authenticate as that user.
+  /// This test will let you easily test the mapping for user properties and roles for any user withoutneeding to authenticate as that user.
   ///
-  /// This test accepts a full LDAP configuration along with a username and attempts to find the full info      for the user from the LDAP server without actually authenticating the user. So, user password is not      required.The configuration is validated before attempting to contact the server.
+  /// This test accepts a full LDAP configuration along with a username and attempts to find the full infofor the user from the LDAP server without actually authenticating the user. So, user password is notrequired.The configuration is validated before attempting to contact the server.
   ///
   /// **test_ldap_user** is required.
   ///
   /// The active LDAP settings are not modified.
+  ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
   ///
   /// PUT /ldap_config/test_user_info -> LDAPConfigTestResult
   ///
@@ -553,13 +994,15 @@ namespace Looker.SDK.API40
 
   /// ### Test the user authentication settings for an LDAP configuration.
   ///
-  /// This test accepts a full LDAP configuration along with a username/password pair and attempts to       authenticate the user with the LDAP server. The configuration is validated before attempting the       authentication.
+  /// This test accepts a full LDAP configuration along with a username/password pair and attempts to authenticate the user with the LDAP server. The configuration is validated before attempting the authentication.
   ///
-  /// Looker will never return an **auth_password**. If this request omits the **auth_password** field, then       the **auth_password** value from the active config (if present) will be used for the test.
+  /// Looker will never return an **auth_password**. If this request omits the **auth_password** field, then the **auth_password** value from the active config (if present) will be used for the test.
   ///
   /// **test_ldap_user** and **test_ldap_password** are required.
   ///
   /// The active LDAP settings are not modified.
+  ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
   ///
   /// PUT /ldap_config/test_user_auth -> LDAPConfigTestResult
   ///
@@ -570,6 +1013,50 @@ namespace Looker.SDK.API40
     ITransportSettings? options = null)
 {  
     return await AuthRequest<LDAPConfigTestResult, Exception>(HttpMethod.Put, "/ldap_config/test_user_auth", null,body,options);
+  }
+
+  /// ### Registers a mobile device.
+  /// # Required fields: [:device_token, :device_type]
+  ///
+  /// POST /mobile/device -> MobileToken
+  ///
+  /// <returns><c>MobileToken</c> Device registered successfully. (application/json)</returns>
+  ///
+  public async Task<SdkResponse<MobileToken, Exception>> register_mobile_device(
+    WriteMobileToken body,
+    ITransportSettings? options = null)
+{  
+    return await AuthRequest<MobileToken, Exception>(HttpMethod.Post, "/mobile/device", null,body,options);
+  }
+
+  /// ### Updates the mobile device registration
+  ///
+  /// PATCH /mobile/device/{device_id} -> MobileToken
+  ///
+  /// <returns><c>MobileToken</c> Device registration updated successfully. (application/json)</returns>
+  ///
+  /// <param name="device_id">Unique id of the device.</param>
+  public async Task<SdkResponse<MobileToken, Exception>> update_mobile_device_registration(
+    string device_id,
+    ITransportSettings? options = null)
+{  
+      device_id = SdkUtils.EncodeParam(device_id);
+    return await AuthRequest<MobileToken, Exception>(HttpMethod.Patch, $"/mobile/device/{device_id}", null,null,options);
+  }
+
+  /// ### Deregister a mobile device.
+  ///
+  /// DELETE /mobile/device/{device_id} -> void
+  ///
+  /// <returns><c>void</c> Device de-registered successfully. ()</returns>
+  ///
+  /// <param name="device_id">Unique id of the device.</param>
+  public async Task<SdkResponse<string, Exception>> deregister_mobile_device(
+    string device_id,
+    ITransportSettings? options = null)
+{  
+      device_id = SdkUtils.EncodeParam(device_id);
+    return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/mobile/device/{device_id}", null,null,options);
   }
 
   /// ### List All OAuth Client Apps
@@ -663,6 +1150,9 @@ namespace Looker.SDK.API40
   /// Deletes the registration info of the app with the matching client_guid.
   /// All active sessions and tokens issued for this app will immediately become invalid.
   ///
+  /// As with most REST DELETE operations, this endpoint does not return an error if the
+  /// indicated resource does not exist.
+  ///
   /// ### Note: this deletion cannot be undone.
   ///
   /// DELETE /oauth_client_apps/{client_guid} -> string
@@ -716,11 +1206,12 @@ namespace Looker.SDK.API40
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<TSuccess, Exception>> activate_app_user<TSuccess>(
     string client_guid,
-    long user_id,
+    string user_id,
     string? fields = null,
     ITransportSettings? options = null) where TSuccess : class
 {  
       client_guid = SdkUtils.EncodeParam(client_guid);
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<TSuccess, Exception>(HttpMethod.Post, $"/oauth_client_apps/{client_guid}/users/{user_id}", new Values {
       { "fields", fields }},null,options);
   }
@@ -745,11 +1236,12 @@ namespace Looker.SDK.API40
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<string, Exception>> deactivate_app_user(
     string client_guid,
-    long user_id,
+    string user_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
       client_guid = SdkUtils.EncodeParam(client_guid);
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/oauth_client_apps/{client_guid}/users/{user_id}", new Values {
       { "fields", fields }},null,options);
   }
@@ -763,9 +1255,11 @@ namespace Looker.SDK.API40
   ///
   /// Configuring OIDC impacts authentication for all users. This configuration should be done carefully.
   ///
-  /// Looker maintains a single OIDC configuation. It can be read and updated.       Updates only succeed if the new state will be valid (in the sense that all required fields are populated);       it is up to you to ensure that the configuration is appropriate and correct).
+  /// Looker maintains a single OIDC configuration. It can be read and updated. Updates only succeed if the new state will be valid (in the sense that all required fields are populated); it is up to you to ensure that the configuration is appropriate and correct).
   ///
   /// OIDC is enabled or disabled for Looker using the **enabled** field.
+  ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
   ///
   /// GET /oidc_config -> OIDCConfig
   ///
@@ -787,6 +1281,8 @@ namespace Looker.SDK.API40
   ///
   /// It is **highly** recommended that any OIDC setting changes be tested using the APIs below before being set globally.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// PATCH /oidc_config -> OIDCConfig
   ///
   /// <returns><c>OIDCConfig</c> New state for OIDC Configuration. (application/json)</returns>
@@ -799,6 +1295,8 @@ namespace Looker.SDK.API40
   }
 
   /// ### Get a OIDC test configuration by test_slug.
+  ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
   ///
   /// GET /oidc_test_configs/{test_slug} -> OIDCConfig
   ///
@@ -815,6 +1313,8 @@ namespace Looker.SDK.API40
 
   /// ### Delete a OIDC test configuration.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// DELETE /oidc_test_configs/{test_slug} -> string
   ///
   /// <returns><c>string</c> Test config succssfully deleted. (application/json)</returns>
@@ -830,6 +1330,8 @@ namespace Looker.SDK.API40
 
   /// ### Create a OIDC test configuration.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// POST /oidc_test_configs -> OIDCConfig
   ///
   /// <returns><c>OIDCConfig</c> OIDC test config (application/json)</returns>
@@ -843,6 +1345,8 @@ namespace Looker.SDK.API40
 
   /// ### Get password config.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// GET /password_config -> PasswordConfig
   ///
   /// <returns><c>PasswordConfig</c> Password Config (application/json)</returns>
@@ -854,6 +1358,8 @@ namespace Looker.SDK.API40
   }
 
   /// ### Update password config.
+  ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
   ///
   /// PATCH /password_config -> PasswordConfig
   ///
@@ -867,6 +1373,8 @@ namespace Looker.SDK.API40
   }
 
   /// ### Force all credentials_email users to reset their login passwords upon their next login.
+  ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
   ///
   /// PUT /password_config/force_password_reset_at_next_login_for_all_users -> string
   ///
@@ -887,9 +1395,11 @@ namespace Looker.SDK.API40
   ///
   /// Configuring SAML impacts authentication for all users. This configuration should be done carefully.
   ///
-  /// Looker maintains a single SAML configuation. It can be read and updated.       Updates only succeed if the new state will be valid (in the sense that all required fields are populated);       it is up to you to ensure that the configuration is appropriate and correct).
+  /// Looker maintains a single SAML configuration. It can be read and updated. Updates only succeed if the new state will be valid (in the sense that all required fields are populated); it is up to you to ensure that the configuration is appropriate and correct).
   ///
   /// SAML is enabled or disabled for Looker using the **enabled** field.
+  ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
   ///
   /// GET /saml_config -> SamlConfig
   ///
@@ -911,6 +1421,8 @@ namespace Looker.SDK.API40
   ///
   /// It is **highly** recommended that any SAML setting changes be tested using the APIs below before being set globally.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// PATCH /saml_config -> SamlConfig
   ///
   /// <returns><c>SamlConfig</c> New state for SAML Configuration. (application/json)</returns>
@@ -923,6 +1435,8 @@ namespace Looker.SDK.API40
   }
 
   /// ### Get a SAML test configuration by test_slug.
+  ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
   ///
   /// GET /saml_test_configs/{test_slug} -> SamlConfig
   ///
@@ -939,6 +1453,8 @@ namespace Looker.SDK.API40
 
   /// ### Delete a SAML test configuration.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// DELETE /saml_test_configs/{test_slug} -> string
   ///
   /// <returns><c>string</c> Test config succssfully deleted. (application/json)</returns>
@@ -954,6 +1470,8 @@ namespace Looker.SDK.API40
 
   /// ### Create a SAML test configuration.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// POST /saml_test_configs -> SamlConfig
   ///
   /// <returns><c>SamlConfig</c> SAML test config (application/json)</returns>
@@ -966,6 +1484,8 @@ namespace Looker.SDK.API40
   }
 
   /// ### Parse the given xml as a SAML IdP metadata document and return the result.
+  ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
   ///
   /// POST /parse_saml_idp_metadata -> SamlMetadataParseResult
   ///
@@ -981,6 +1501,8 @@ namespace Looker.SDK.API40
   /// ### Fetch the given url and parse it as a SAML IdP metadata document and return the result.
   /// Note that this requires that the url be public or at least at a location where the Looker instance
   /// can fetch it without requiring any special authentication.
+  ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
   ///
   /// POST /fetch_and_parse_saml_idp_metadata -> SamlMetadataParseResult
   ///
@@ -1022,6 +1544,8 @@ namespace Looker.SDK.API40
   ///
   /// Returns the users that have been added to the Support Access Allowlist
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// GET /support_access/allowlist -> SupportAccessAllowlistEntry[]
   ///
   /// <returns><c>SupportAccessAllowlistEntry[]</c> Support Access Allowlist Entries (application/json)</returns>
@@ -1039,6 +1563,8 @@ namespace Looker.SDK.API40
   ///
   /// Adds a list of emails to the Allowlist, using the provided reason
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// POST /support_access/allowlist -> SupportAccessAllowlistEntry[]
   ///
   /// <returns><c>SupportAccessAllowlistEntry[]</c> Support Access Allowlist Entries (application/json)</returns>
@@ -1053,6 +1579,8 @@ namespace Looker.SDK.API40
   /// ### Delete Support Access Allowlist User
   ///
   /// Deletes the specified Allowlist Entry Id
+  ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
   ///
   /// DELETE /support_access/allowlist/{entry_id} -> string
   ///
@@ -1071,6 +1599,8 @@ namespace Looker.SDK.API40
   ///
   /// Enables Support Access for the provided duration
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// PUT /support_access/enable -> SupportAccessStatus
   ///
   /// <returns><c>SupportAccessStatus</c> Support Access Status (application/json)</returns>
@@ -1086,6 +1616,8 @@ namespace Looker.SDK.API40
   ///
   /// Disables Support Access immediately
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// PUT /support_access/disable -> SupportAccessStatus
   ///
   /// <returns><c>SupportAccessStatus</c> Support Access Status (application/json)</returns>
@@ -1099,6 +1631,8 @@ namespace Looker.SDK.API40
   /// ### Support Access Status
   ///
   /// Returns the current Support Access Status
+  ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
   ///
   /// GET /support_access/status -> SupportAccessStatus
   ///
@@ -1132,8 +1666,10 @@ namespace Looker.SDK.API40
   /// <returns><c>UserLoginLockout[]</c> User Login Lockout (application/json)</returns>
   ///
   /// <param name="fields">Include only these fields in the response</param>
-  /// <param name="page">Return only page N of paginated results</param>
-  /// <param name="per_page">Return N rows of data per page</param>
+  /// <param name="page">DEPRECATED. Use limit and offset instead. Return only page N of paginated results</param>
+  /// <param name="per_page">DEPRECATED. Use limit and offset instead. Return N rows of data per page</param>
+  /// <param name="limit">Number of results to return. (used with offset and takes priority over page and per_page)</param>
+  /// <param name="offset">Number of results to skip before returning any. (used with limit and takes priority over page and per_page)</param>
   /// <param name="sorts">Fields to sort by.</param>
   /// <param name="auth_type">Auth type user is locked out for (email, ldap, totp, api)</param>
   /// <param name="full_name">Match name</param>
@@ -1144,6 +1680,8 @@ namespace Looker.SDK.API40
     string? fields = null,
     long? page = null,
     long? per_page = null,
+    long? limit = null,
+    long? offset = null,
     string? sorts = null,
     string? auth_type = null,
     string? full_name = null,
@@ -1156,6 +1694,8 @@ namespace Looker.SDK.API40
       { "fields", fields },
       { "page", page },
       { "per_page", per_page },
+      { "limit", limit },
+      { "offset", offset },
       { "sorts", sorts },
       { "auth_type", auth_type },
       { "full_name", full_name },
@@ -1249,11 +1789,12 @@ namespace Looker.SDK.API40
   /// <param name="favorited">Return favorited boards when true.</param>
   /// <param name="creator_id">Filter on boards created by a particular user.</param>
   /// <param name="sorts">The fields to sort the results by</param>
-  /// <param name="page">The page to return.</param>
-  /// <param name="per_page">The number of items in the returned page.</param>
-  /// <param name="offset">The number of items to skip before returning any. (used with limit and takes priority over page and per_page)</param>
-  /// <param name="limit">The maximum number of items to return. (used with offset and takes priority over page and per_page)</param>
+  /// <param name="page">DEPRECATED. Use limit and offset instead. Return only page N of paginated results</param>
+  /// <param name="per_page">DEPRECATED. Use limit and offset instead. Return N rows of data per page</param>
+  /// <param name="offset">Number of results to return. (used with offset and takes priority over page and per_page)</param>
+  /// <param name="limit">Number of results to skip before returning any. (used with limit and takes priority over page and per_page)</param>
   /// <param name="filter_or">Combine given search criteria in a boolean OR expression</param>
+  /// <param name="permission">Filter results based on permission, either show (default) or update</param>
   public async Task<SdkResponse<Board[], Exception>> search_boards(
     string? title = null,
     string? created_at = null,
@@ -1268,6 +1809,7 @@ namespace Looker.SDK.API40
     long? offset = null,
     long? limit = null,
     bool? filter_or = null,
+    string? permission = null,
     ITransportSettings? options = null)
 {  
     return await AuthRequest<Board[], Exception>(HttpMethod.Get, "/boards/search", new Values {
@@ -1283,7 +1825,8 @@ namespace Looker.SDK.API40
       { "per_page", per_page },
       { "offset", offset },
       { "limit", limit },
-      { "filter_or", filter_or }},null,options);
+      { "filter_or", filter_or },
+      { "permission", permission }},null,options);
   }
 
   /// ### Get information about a board.
@@ -1295,10 +1838,11 @@ namespace Looker.SDK.API40
   /// <param name="board_id">Id of board</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<Board, Exception>> board(
-    long board_id,
+    string board_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      board_id = SdkUtils.EncodeParam(board_id);
     return await AuthRequest<Board, Exception>(HttpMethod.Get, $"/boards/{board_id}", new Values {
       { "fields", fields }},null,options);
   }
@@ -1312,11 +1856,12 @@ namespace Looker.SDK.API40
   /// <param name="board_id">Id of board</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<Board, Exception>> update_board(
-    long board_id,
+    string board_id,
     WriteBoard body,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      board_id = SdkUtils.EncodeParam(board_id);
     return await AuthRequest<Board, Exception>(HttpMethod.Patch, $"/boards/{board_id}", new Values {
       { "fields", fields }},body,options);
   }
@@ -1329,9 +1874,10 @@ namespace Looker.SDK.API40
   ///
   /// <param name="board_id">Id of board</param>
   public async Task<SdkResponse<string, Exception>> delete_board(
-    long board_id,
+    string board_id,
     ITransportSettings? options = null)
 {  
+      board_id = SdkUtils.EncodeParam(board_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/boards/{board_id}", null,null,options);
   }
 
@@ -1381,10 +1927,11 @@ namespace Looker.SDK.API40
   /// <param name="board_item_id">Id of board item</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<BoardItem, Exception>> board_item(
-    long board_item_id,
+    string board_item_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      board_item_id = SdkUtils.EncodeParam(board_item_id);
     return await AuthRequest<BoardItem, Exception>(HttpMethod.Get, $"/board_items/{board_item_id}", new Values {
       { "fields", fields }},null,options);
   }
@@ -1398,11 +1945,12 @@ namespace Looker.SDK.API40
   /// <param name="board_item_id">Id of board item</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<BoardItem, Exception>> update_board_item(
-    long board_item_id,
+    string board_item_id,
     WriteBoardItem body,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      board_item_id = SdkUtils.EncodeParam(board_item_id);
     return await AuthRequest<BoardItem, Exception>(HttpMethod.Patch, $"/board_items/{board_item_id}", new Values {
       { "fields", fields }},body,options);
   }
@@ -1413,11 +1961,12 @@ namespace Looker.SDK.API40
   ///
   /// <returns><c>string</c> Successfully deleted. (application/json)</returns>
   ///
-  /// <param name="board_item_id">Id of board_item</param>
+  /// <param name="board_item_id">Id of board item</param>
   public async Task<SdkResponse<string, Exception>> delete_board_item(
-    long board_item_id,
+    string board_item_id,
     ITransportSettings? options = null)
 {  
+      board_item_id = SdkUtils.EncodeParam(board_item_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/board_items/{board_item_id}", null,null,options);
   }
 
@@ -1464,10 +2013,11 @@ namespace Looker.SDK.API40
   /// <param name="board_section_id">Id of board section</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<BoardSection, Exception>> board_section(
-    long board_section_id,
+    string board_section_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      board_section_id = SdkUtils.EncodeParam(board_section_id);
     return await AuthRequest<BoardSection, Exception>(HttpMethod.Get, $"/board_sections/{board_section_id}", new Values {
       { "fields", fields }},null,options);
   }
@@ -1481,11 +2031,12 @@ namespace Looker.SDK.API40
   /// <param name="board_section_id">Id of board section</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<BoardSection, Exception>> update_board_section(
-    long board_section_id,
+    string board_section_id,
     WriteBoardSection body,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      board_section_id = SdkUtils.EncodeParam(board_section_id);
     return await AuthRequest<BoardSection, Exception>(HttpMethod.Patch, $"/board_sections/{board_section_id}", new Values {
       { "fields", fields }},body,options);
   }
@@ -1498,9 +2049,10 @@ namespace Looker.SDK.API40
   ///
   /// <param name="board_section_id">Id of board section</param>
   public async Task<SdkResponse<string, Exception>> delete_board_section(
-    long board_section_id,
+    string board_section_id,
     ITransportSettings? options = null)
 {  
+      board_section_id = SdkUtils.EncodeParam(board_section_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/board_sections/{board_section_id}", null,null,options);
   }
 
@@ -1693,78 +2245,6 @@ namespace Looker.SDK.API40
 
   #endregion ColorCollection: Manage Color Collections
 
-  #region Command: Manage Commands
-
-  /// ### Get All Commands.
-  ///
-  /// GET /commands -> Command[]
-  ///
-  /// <returns><c>Command[]</c> Commands (application/json)</returns>
-  ///
-  /// <param name="content_id">Id of the associated content. This must be accompanied with content_type.</param>
-  /// <param name="content_type">Type of the associated content. This must be accompanied with content_id.</param>
-  /// <param name="limit">Number of results to return.</param>
-  public async Task<SdkResponse<Command[], Exception>> get_all_commands(
-    string? content_id = null,
-    string? content_type = null,
-    long? limit = null,
-    ITransportSettings? options = null)
-{  
-    return await AuthRequest<Command[], Exception>(HttpMethod.Get, "/commands", new Values {
-      { "content_id", content_id },
-      { "content_type", content_type },
-      { "limit", limit }},null,options);
-  }
-
-  /// ### Create a new command.
-  /// # Required fields: [:name, :linked_content_id, :linked_content_type]
-  /// # `linked_content_type` must be one of ["dashboard", "lookml_dashboard"]
-  /// #
-  ///
-  /// POST /commands -> Command
-  ///
-  /// <returns><c>Command</c> The command is saved. (application/json)</returns>
-  ///
-  public async Task<SdkResponse<Command, Exception>> create_command(
-    WriteCommand body,
-    ITransportSettings? options = null)
-{  
-    return await AuthRequest<Command, Exception>(HttpMethod.Post, "/commands", null,body,options);
-  }
-
-  /// ### Update an existing custom command.
-  /// # Optional fields: ['name', 'description']
-  /// #
-  ///
-  /// PATCH /commands/{command_id} -> Command
-  ///
-  /// <returns><c>Command</c> The command is updated. (application/json)</returns>
-  ///
-  /// <param name="command_id">ID of a command</param>
-  public async Task<SdkResponse<Command, Exception>> update_command(
-    long command_id,
-    UpdateCommand body,
-    ITransportSettings? options = null)
-{  
-    return await AuthRequest<Command, Exception>(HttpMethod.Patch, $"/commands/{command_id}", null,body,options);
-  }
-
-  /// ### Delete an existing custom command.
-  ///
-  /// DELETE /commands/{command_id} -> void
-  ///
-  /// <returns><c>void</c> The command is deleted. ()</returns>
-  ///
-  /// <param name="command_id">ID of a command</param>
-  public async Task<SdkResponse<string, Exception>> delete_command(
-    long command_id,
-    ITransportSettings? options = null)
-{  
-    return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/commands/{command_id}", null,null,options);
-  }
-
-  #endregion Command: Manage Commands
-
   #region Config: Manage General Configuration
 
   /// Get the current Cloud Storage Configuration.
@@ -1798,6 +2278,7 @@ namespace Looker.SDK.API40
   ///
   /// <returns><c>CustomWelcomeEmail</c> Custom Welcome Email (application/json)</returns>
   ///
+  [Obsolete("Deprecated")]
   public async Task<SdkResponse<CustomWelcomeEmail, Exception>> custom_welcome_email(
     ITransportSettings? options = null)
 {  
@@ -1811,6 +2292,7 @@ namespace Looker.SDK.API40
   /// <returns><c>CustomWelcomeEmail</c> Custom Welcome Email (application/json)</returns>
   ///
   /// <param name="send_test_welcome_email">If true a test email with the content from the request will be sent to the current user after saving</param>
+  [Obsolete("Deprecated")]
   public async Task<SdkResponse<CustomWelcomeEmail, Exception>> update_custom_welcome_email(
     CustomWelcomeEmail body,
     bool? send_test_welcome_email = null,
@@ -1872,6 +2354,22 @@ namespace Looker.SDK.API40
     return await AuthRequest<DigestEmailSend, Exception>(HttpMethod.Post, "/digest_email_send", null,null,options);
   }
 
+  /// ### Get Egress IP Addresses
+  ///
+  /// Returns the list of public egress IP Addresses for a hosted customer's instance
+  ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
+  /// GET /public_egress_ip_addresses -> EgressIpAddresses
+  ///
+  /// <returns><c>EgressIpAddresses</c> Public Egress IP Addresses (application/json)</returns>
+  ///
+  public async Task<SdkResponse<EgressIpAddresses, Exception>> public_egress_ip_addresses(
+    ITransportSettings? options = null)
+{  
+    return await AuthRequest<EgressIpAddresses, Exception>(HttpMethod.Get, "/public_egress_ip_addresses", null,null,options);
+  }
+
   /// ### Set the menu item name and content for internal help resources
   ///
   /// GET /internal_help_resources_content -> InternalHelpResourcesContent
@@ -1924,6 +2422,8 @@ namespace Looker.SDK.API40
 
   /// ### Get all legacy features.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// GET /legacy_features -> LegacyFeature[]
   ///
   /// <returns><c>LegacyFeature[]</c> Legacy Feature (application/json)</returns>
@@ -1935,6 +2435,8 @@ namespace Looker.SDK.API40
   }
 
   /// ### Get information about the legacy feature with a specific id.
+  ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
   ///
   /// GET /legacy_features/{legacy_feature_id} -> LegacyFeature
   ///
@@ -1950,6 +2452,8 @@ namespace Looker.SDK.API40
   }
 
   /// ### Update information about the legacy feature with a specific id.
+  ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
   ///
   /// PATCH /legacy_features/{legacy_feature_id} -> LegacyFeature
   ///
@@ -1992,12 +2496,27 @@ namespace Looker.SDK.API40
   /// ### Get Looker Settings
   ///
   /// Available settings are:
-  ///  - extension_framework_enabled
-  ///  - marketplace_auto_install_enabled
-  ///  - marketplace_enabled
-  ///  - whitelabel_configuration
+  ///  - allow_user_timezones
   ///  - custom_welcome_email
+  ///  - data_connector_default_enabled
+  ///  - dashboard_auto_refresh_restriction
+  ///  - dashboard_auto_refresh_minimum_interval
+  ///  - extension_framework_enabled
+  ///  - extension_load_url_enabled
+  ///  - instance_config
+  ///  - marketplace_auto_install_enabled
+  ///  - marketplace_automation
+  ///  - marketplace_terms_accepted
+  ///  - marketplace_enabled
+  ///  - marketplace_site
   ///  - onboarding_enabled
+  ///  - privatelabel_configuration
+  ///  - timezone
+  ///  - host_url
+  ///  - email_domain_allowlist
+  ///  - embed_cookieless_v2
+  ///  - embed_enabled
+  ///  - embed_config
   ///
   /// GET /setting -> Setting
   ///
@@ -2015,14 +2534,31 @@ namespace Looker.SDK.API40
   /// ### Configure Looker Settings
   ///
   /// Available settings are:
-  ///  - extension_framework_enabled
-  ///  - marketplace_auto_install_enabled
-  ///  - marketplace_enabled
-  ///  - whitelabel_configuration
+  ///  - allow_user_timezones
   ///  - custom_welcome_email
+  ///  - data_connector_default_enabled
+  ///  - dashboard_auto_refresh_restriction
+  ///  - dashboard_auto_refresh_minimum_interval
+  ///  - extension_framework_enabled
+  ///  - extension_load_url_enabled
+  ///  - instance_config
+  ///  - marketplace_auto_install_enabled
+  ///  - marketplace_automation
+  ///  - marketplace_terms_accepted
+  ///  - marketplace_enabled
+  ///  - marketplace_site
   ///  - onboarding_enabled
+  ///  - privatelabel_configuration
+  ///  - timezone
+  ///  - host_url
+  ///  - email_domain_allowlist
+  ///  - embed_cookieless_v2
+  ///  - embed_enabled
+  ///  - embed_config
   ///
   /// See the `Setting` type for more information on the specific values that can be configured.
+  ///
+  /// If a setting update is rejected, the API error payload should provide information on the cause of the rejection.
   ///
   /// PATCH /setting -> Setting
   ///
@@ -2036,6 +2572,21 @@ namespace Looker.SDK.API40
 {  
     return await AuthRequest<Setting, Exception>(HttpMethod.Patch, "/setting", new Values {
       { "fields", fields }},body,options);
+  }
+
+  /// ### Configure SMTP Settings
+  ///   This API allows users to configure the SMTP settings on the Looker instance.
+  ///   Only admin users are authorised to call this API.
+  ///
+  /// POST /smtp_settings -> void
+  ///
+  /// <returns><c>void</c> Successfully updated SMTP settings ()</returns>
+  ///
+  public async Task<SdkResponse<string, Exception>> set_smtp_settings(
+    SmtpSettings body,
+    ITransportSettings? options = null)
+{  
+    return await AuthRequest<string, Exception>(HttpMethod.Post, "/smtp_settings", null,body,options);
   }
 
   /// ### Get current SMTP status.
@@ -2101,13 +2652,17 @@ namespace Looker.SDK.API40
   }
 
   /// ### This feature is enabled only by special license.
-  /// ### Gets the whitelabel configuration, which includes hiding documentation links, custom favicon uploading, etc.
+  ///
+  /// This endpoint provides the private label configuration, which includes hiding documentation links, custom favicon uploading, etc.
+  ///
+  /// This endpoint is deprecated. [Get Setting](#!/Config/get_setting) should be used to retrieve private label settings instead
   ///
   /// GET /whitelabel_configuration -> WhitelabelConfiguration
   ///
-  /// <returns><c>WhitelabelConfiguration</c> Whitelabel configuration (application/json)</returns>
+  /// <returns><c>WhitelabelConfiguration</c> Private label configuration (application/json)</returns>
   ///
   /// <param name="fields">Requested fields.</param>
+  [Obsolete("Deprecated")]
   public async Task<SdkResponse<WhitelabelConfiguration, Exception>> whitelabel_configuration(
     string? fields = null,
     ITransportSettings? options = null)
@@ -2116,12 +2671,15 @@ namespace Looker.SDK.API40
       { "fields", fields }},null,options);
   }
 
-  /// ### Update the whitelabel configuration
+  /// ### Update the private label configuration
+  ///
+  /// This endpoint is deprecated. [Set Setting](#!/Config/set_setting) should be used to update private label settings instead
   ///
   /// PUT /whitelabel_configuration -> WhitelabelConfiguration
   ///
-  /// <returns><c>WhitelabelConfiguration</c> Whitelabel configuration (application/json)</returns>
+  /// <returns><c>WhitelabelConfiguration</c> Private label configuration (application/json)</returns>
   ///
+  [Obsolete("Deprecated")]
   public async Task<SdkResponse<WhitelabelConfiguration, Exception>> update_whitelabel_configuration(
     WriteWhitelabelConfiguration body,
     ITransportSettings? options = null)
@@ -2324,6 +2882,24 @@ namespace Looker.SDK.API40
     ITransportSettings? options = null)
 {  
     return await AuthRequest<ExternalOauthApplication, Exception>(HttpMethod.Post, "/external_oauth_applications", null,body,options);
+  }
+
+  /// ### Update an OAuth Application's client secret.
+  ///
+  /// This is an OAuth Application which Looker uses to access external systems.
+  ///
+  /// PATCH /external_oauth_applications/{client_id} -> ExternalOauthApplication
+  ///
+  /// <returns><c>ExternalOauthApplication</c> External OAuth Application (application/json)</returns>
+  ///
+  /// <param name="client_id">The client ID of the OAuth App to update</param>
+  public async Task<SdkResponse<ExternalOauthApplication, Exception>> update_external_oauth_application(
+    string client_id,
+    WriteExternalOauthApplication body,
+    ITransportSettings? options = null)
+{  
+      client_id = SdkUtils.EncodeParam(client_id);
+    return await AuthRequest<ExternalOauthApplication, Exception>(HttpMethod.Patch, $"/external_oauth_applications/{client_id}", null,body,options);
   }
 
   /// ### Create OAuth User state.
@@ -2574,7 +3150,7 @@ namespace Looker.SDK.API40
   /// <param name="fields">Requested fields.</param>
   /// <param name="filter_or">Combine given search criteria in a boolean OR expression</param>
   public async Task<SdkResponse<ContentFavorite[], Exception>> search_content_favorites(
-    long? id = null,
+    string? id = null,
     string? user_id = null,
     string? content_metadata_id = null,
     string? dashboard_id = null,
@@ -2610,10 +3186,11 @@ namespace Looker.SDK.API40
   /// <param name="content_favorite_id">Id of favorite content</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<ContentFavorite, Exception>> content_favorite(
-    long content_favorite_id,
+    string content_favorite_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      content_favorite_id = SdkUtils.EncodeParam(content_favorite_id);
     return await AuthRequest<ContentFavorite, Exception>(HttpMethod.Get, $"/content_favorite/{content_favorite_id}", new Values {
       { "fields", fields }},null,options);
   }
@@ -2626,9 +3203,10 @@ namespace Looker.SDK.API40
   ///
   /// <param name="content_favorite_id">Id of favorite content</param>
   public async Task<SdkResponse<string, Exception>> delete_content_favorite(
-    long content_favorite_id,
+    string content_favorite_id,
     ITransportSettings? options = null)
 {  
+      content_favorite_id = SdkUtils.EncodeParam(content_favorite_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/content_favorite/{content_favorite_id}", null,null,options);
   }
 
@@ -2654,7 +3232,7 @@ namespace Looker.SDK.API40
   /// <param name="parent_id">Parent space of content.</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<ContentMeta[], Exception>> all_content_metadatas(
-    long parent_id,
+    string parent_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
@@ -2672,10 +3250,11 @@ namespace Looker.SDK.API40
   /// <param name="content_metadata_id">Id of content metadata</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<ContentMeta, Exception>> content_metadata(
-    long content_metadata_id,
+    string content_metadata_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      content_metadata_id = SdkUtils.EncodeParam(content_metadata_id);
     return await AuthRequest<ContentMeta, Exception>(HttpMethod.Get, $"/content_metadata/{content_metadata_id}", new Values {
       { "fields", fields }},null,options);
   }
@@ -2688,10 +3267,11 @@ namespace Looker.SDK.API40
   ///
   /// <param name="content_metadata_id">Id of content metadata</param>
   public async Task<SdkResponse<ContentMeta, Exception>> update_content_metadata(
-    long content_metadata_id,
+    string content_metadata_id,
     WriteContentMeta body,
     ITransportSettings? options = null)
 {  
+      content_metadata_id = SdkUtils.EncodeParam(content_metadata_id);
     return await AuthRequest<ContentMeta, Exception>(HttpMethod.Patch, $"/content_metadata/{content_metadata_id}", null,body,options);
   }
 
@@ -2704,7 +3284,7 @@ namespace Looker.SDK.API40
   /// <param name="content_metadata_id">Id of content metadata</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<ContentMetaGroupUser[], Exception>> all_content_metadata_accesses(
-    long content_metadata_id,
+    string content_metadata_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
@@ -2753,15 +3333,93 @@ namespace Looker.SDK.API40
   ///
   /// <param name="content_metadata_access_id">Id of content metadata access</param>
   public async Task<SdkResponse<string, Exception>> delete_content_metadata_access(
-    long content_metadata_access_id,
+    string content_metadata_access_id,
     ITransportSettings? options = null)
 {  
+      content_metadata_access_id = SdkUtils.EncodeParam(content_metadata_access_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/content_metadata_access/{content_metadata_access_id}", null,null,options);
+  }
+
+  /// ### Search across looks, dashboards, and lookml dashboards. The terms field will be matched against the
+  /// title and description of the content and the closest results are returned. Content that has been frequently
+  /// viewed and those pieces of content stored in public folders will be ranked more highly in the results.
+  ///
+  /// This endpoint does not return a full description of these content types. For more specific information
+  /// about each type please refer to the individual content specific API endpoints.
+  ///
+  /// Get the **full details** of a specific dashboard (or lookml dashboard) by id with [dashboard()](#!/Dashboard/dashboard)
+  /// Get the **full details** of a specific look by id with [look()](#!/Look/look)
+  ///
+  /// GET /content/{terms} -> ContentSearch[]
+  ///
+  /// <returns><c>ContentSearch[]</c> Matching content (application/json)</returns>
+  ///
+  /// <param name="terms">Search terms</param>
+  /// <param name="fields">Requested fields.</param>
+  /// <param name="types">Content types requested (dashboard, look, lookml_dashboard).</param>
+  /// <param name="limit">Number of results to return. (used with offset and takes priority over page and per_page)</param>
+  /// <param name="offset">Number of results to skip before returning any. (used with limit and takes priority over page and per_page)</param>
+  /// <param name="page">DEPRECATED. Use limit and offset instead. Return only page N of paginated results</param>
+  /// <param name="per_page">DEPRECATED. Use limit and offset instead. Return N rows of data per page</param>
+  public async Task<SdkResponse<ContentSearch[], Exception>> search_content(
+    string terms,
+    string? fields = null,
+    string? types = null,
+    long? limit = null,
+    long? offset = null,
+    long? page = null,
+    long? per_page = null,
+    ITransportSettings? options = null)
+{  
+      terms = SdkUtils.EncodeParam(terms);
+    return await AuthRequest<ContentSearch[], Exception>(HttpMethod.Get, $"/content/{terms}", new Values {
+      { "fields", fields },
+      { "types", types },
+      { "limit", limit },
+      { "offset", offset },
+      { "page", page },
+      { "per_page", per_page }},null,options);
+  }
+
+  /// ### Get Content Summary
+  ///
+  /// Retrieves a collection of content items related to user activity and engagement, such as recently viewed content,
+  /// favorites and scheduled items.
+  ///
+  /// GET /content_summary -> ContentSummary[]
+  ///
+  /// <returns><c>ContentSummary[]</c> Content Summary (application/json)</returns>
+  ///
+  /// <param name="fields">Comma-delimited names of fields to return in responses. Omit for all fields</param>
+  /// <param name="limit">Number of results to return. (used with offset)</param>
+  /// <param name="offset">Number of results to skip before returning any. (used with limit)</param>
+  /// <param name="target_group_id">Match group id</param>
+  /// <param name="target_user_id">Match user id</param>
+  /// <param name="target_content_type">Content type to match, options are: look, dashboard. Can be provided as a comma delimited list.</param>
+  /// <param name="sorts">Fields to sort by</param>
+  public async Task<SdkResponse<ContentSummary[], Exception>> content_summary(
+    string? fields = null,
+    long? limit = null,
+    long? offset = null,
+    string? target_group_id = null,
+    string? target_user_id = null,
+    string? target_content_type = null,
+    string? sorts = null,
+    ITransportSettings? options = null)
+{  
+    return await AuthRequest<ContentSummary[], Exception>(HttpMethod.Get, "/content_summary", new Values {
+      { "fields", fields },
+      { "limit", limit },
+      { "offset", offset },
+      { "target_group_id", target_group_id },
+      { "target_user_id", target_user_id },
+      { "target_content_type", target_content_type },
+      { "sorts", sorts }},null,options);
   }
 
   /// ### Get an image representing the contents of a dashboard or look.
   ///
-  /// The returned thumbnail is an abstract representation of the contents of a dashbord or look and does not
+  /// The returned thumbnail is an abstract representation of the contents of a dashboard or look and does not
   /// reflect the actual data displayed in the respective visualizations.
   ///
   /// GET /content_thumbnail/{type}/{resource_id} -> string
@@ -2776,6 +3434,7 @@ namespace Looker.SDK.API40
   /// <param name="type">Either dashboard or look</param>
   /// <param name="resource_id">ID of the dashboard or look to render</param>
   /// <param name="reload">Whether or not to refresh the rendered image with the latest content</param>
+  /// <param name="theme">Light or dark background. Default is "light"</param>
   /// <param name="format">A value of png produces a thumbnail in PNG format instead of SVG (default)</param>
   /// <param name="width">The width of the image if format is supplied</param>
   /// <param name="height">The height of the image if format is supplied</param>
@@ -2783,6 +3442,7 @@ namespace Looker.SDK.API40
     string type,
     string resource_id,
     string? reload = null,
+    string? theme = null,
     string? format = null,
     long? width = null,
     long? height = null,
@@ -2792,6 +3452,7 @@ namespace Looker.SDK.API40
       resource_id = SdkUtils.EncodeParam(resource_id);
     return await AuthRequest<TSuccess, Exception>(HttpMethod.Get, $"/content_thumbnail/{type}/{resource_id}", new Values {
       { "reload", reload },
+      { "theme", theme },
       { "format", format },
       { "width", width },
       { "height", height }},null,options);
@@ -2891,7 +3552,7 @@ namespace Looker.SDK.API40
   ///
   /// # DEPRECATED:  Use [content_thumbnail()](#!/Content/content_thumbnail)
   ///
-  /// The returned thumbnail is an abstract representation of the contents of a dashbord or look and does not
+  /// The returned thumbnail is an abstract representation of the contents of a dashboard or look and does not
   /// reflect the actual data displayed in the respective visualizations.
   ///
   /// GET /vector_thumbnail/{type}/{resource_id} -> string
@@ -2901,6 +3562,7 @@ namespace Looker.SDK.API40
   /// <param name="type">Either dashboard or look</param>
   /// <param name="resource_id">ID of the dashboard or look to render</param>
   /// <param name="reload">Whether or not to refresh the rendered image with the latest content</param>
+  [Obsolete("Deprecated")]
   public async Task<SdkResponse<string, Exception>> vector_thumbnail(
     string type,
     string resource_id,
@@ -2942,8 +3604,8 @@ namespace Looker.SDK.API40
   ///
   /// Creates a new dashboard object and returns the details of the newly created dashboard.
   ///
-  /// `Title`, `user_id`, and `space_id` are all required fields.
-  /// `Space_id` and `user_id` must contain the id of an existing space or user, respectively.
+  /// `Title` and `space_id` are required fields.
+  /// `Space_id` must contain the id of an existing space.
   /// A dashboard's `title` must be unique within the space in which it resides.
   ///
   /// If you receive a 422 error response when creating a dashboard, be sure to look at the
@@ -2966,7 +3628,8 @@ namespace Looker.SDK.API40
 
   /// ### Search Dashboards
   ///
-  /// Returns an **array of dashboard objects** that match the specified search criteria.
+  /// Returns an array of **user-defined dashboard** objects that match the specified search criteria.
+  /// Note, [search_dashboards()](#!/Dashboard/search_dashboards) does not return LookML dashboard objects.
   ///
   /// If multiple search params are given and `filter_or` is FALSE or not specified,
   /// search params are combined in a logical AND operation.
@@ -3003,7 +3666,7 @@ namespace Looker.SDK.API40
   /// <param name="title">Match Dashboard title.</param>
   /// <param name="description">Match Dashboard description.</param>
   /// <param name="content_favorite_id">Filter on a content favorite id.</param>
-  /// <param name="folder_id">Filter on a particular space.</param>
+  /// <param name="folder_id">Filter on a particular folder.</param>
   /// <param name="deleted">Filter on dashboards deleted status.</param>
   /// <param name="user_id">Filter on dashboards created by a particular user.</param>
   /// <param name="view_count">Filter on a particular value of view_count</param>
@@ -3011,12 +3674,13 @@ namespace Looker.SDK.API40
   /// <param name="curate">Exclude items that exist only in personal spaces other than the users</param>
   /// <param name="last_viewed_at">Select dashboards based on when they were last viewed</param>
   /// <param name="fields">Requested fields.</param>
-  /// <param name="page">Requested page.</param>
-  /// <param name="per_page">Results per page.</param>
+  /// <param name="page">DEPRECATED. Use limit and offset instead. Return only page N of paginated results</param>
+  /// <param name="per_page">DEPRECATED. Use limit and offset instead. Return N rows of data per page</param>
   /// <param name="limit">Number of results to return. (used with offset and takes priority over page and per_page)</param>
   /// <param name="offset">Number of results to skip before returning any. (used with limit and takes priority over page and per_page)</param>
   /// <param name="sorts">One or more fields to sort by. Sortable fields: [:title, :user_id, :id, :created_at, :space_id, :folder_id, :description, :view_count, :favorite_count, :slug, :content_favorite_id, :content_metadata_id, :deleted, :deleted_at, :last_viewed_at, :last_accessed_at]</param>
   /// <param name="filter_or">Combine given search criteria in a boolean OR expression</param>
+  /// <param name="not_owned_by">Filter out the dashboards owned by the user passed at the :user_id params</param>
   public async Task<SdkResponse<Dashboard[], Exception>> search_dashboards(
     string? id = null,
     string? slug = null,
@@ -3037,6 +3701,7 @@ namespace Looker.SDK.API40
     long? offset = null,
     string? sorts = null,
     bool? filter_or = null,
+    bool? not_owned_by = null,
     ITransportSettings? options = null)
 {  
     return await AuthRequest<Dashboard[], Exception>(HttpMethod.Get, "/dashboards/search", new Values {
@@ -3058,7 +3723,8 @@ namespace Looker.SDK.API40
       { "limit", limit },
       { "offset", offset },
       { "sorts", sorts },
-      { "filter_or", filter_or }},null,options);
+      { "filter_or", filter_or },
+      { "not_owned_by", not_owned_by }},null,options);
   }
 
   /// ### Import a LookML dashboard to a space as a UDD
@@ -3150,7 +3816,7 @@ namespace Looker.SDK.API40
   /// You can use this function to change the string and integer properties of
   /// a dashboard. Nested objects such as filters, dashboard elements, or dashboard layout components
   /// cannot be modified by this function - use the update functions for the respective
-  /// nested object types (like [update_dashboard_filter()](#!/3.1/Dashboard/update_dashboard_filter) to change a filter)
+  /// nested object types (like [update_dashboard_filter()](#!/Dashboard/update_dashboard_filter) to change a filter)
   /// to modify nested objects referenced by a dashboard.
   ///
   /// If you receive a 422 error response when updating a dashboard, be sure to look at the
@@ -3191,7 +3857,7 @@ namespace Looker.SDK.API40
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/dashboards/{dashboard_id}", null,null,options);
   }
 
-  /// ### Get Aggregate Table LookML for Each Query on a Dahboard
+  /// ### Get Aggregate Table LookML for Each Query on a Dashboard
   ///
   /// Returns a JSON object that contains the dashboard id and Aggregate Table lookml
   ///
@@ -3246,6 +3912,46 @@ namespace Looker.SDK.API40
       dashboard_id = SdkUtils.EncodeParam(dashboard_id);
     return await AuthRequest<Dashboard, Exception>(HttpMethod.Patch, $"/dashboards/{dashboard_id}/move", new Values {
       { "folder_id", folder_id }},null,options);
+  }
+
+  /// ### Creates a dashboard object based on LookML Dashboard YAML, and returns the details of the newly created dashboard.
+  ///
+  /// If a dashboard exists with the YAML-defined "preferred_slug", the new dashboard will overwrite it. Otherwise, a new
+  /// dashboard will be created. Note that when a dashboard is overwritten, alerts will not be maintained.
+  ///
+  /// If a folder_id is specified: new dashboards will be placed in that folder, and overwritten dashboards will be moved to it
+  /// If the folder_id isn't specified: new dashboards will be placed in the caller's personal folder, and overwritten dashboards
+  /// will remain where they were
+  ///
+  /// LookML must contain valid LookML YAML code. It's recommended to use the LookML format returned
+  /// from [dashboard_lookml()](#!/Dashboard/dashboard_lookml) as the input LookML (newlines replaced with
+  /// ).
+  ///
+  /// Note that the created dashboard is not linked to any LookML Dashboard,
+  /// i.e. [sync_lookml_dashboard()](#!/Dashboard/sync_lookml_dashboard) will not update dashboards created by this method.
+  ///
+  /// POST /dashboards/lookml -> Dashboard
+  ///
+  /// <returns><c>Dashboard</c> dashboard (application/json)</returns>
+  ///
+  public async Task<SdkResponse<Dashboard, Exception>> import_dashboard_from_lookml(
+    WriteDashboardLookml body,
+    ITransportSettings? options = null)
+{  
+    return await AuthRequest<Dashboard, Exception>(HttpMethod.Post, "/dashboards/lookml", null,body,options);
+  }
+
+  /// # DEPRECATED:  Use [import_dashboard_from_lookml()](#!/Dashboard/import_dashboard_from_lookml)
+  ///
+  /// POST /dashboards/from_lookml -> Dashboard
+  ///
+  /// <returns><c>Dashboard</c> dashboard (application/json)</returns>
+  ///
+  public async Task<SdkResponse<Dashboard, Exception>> create_dashboard_from_lookml(
+    WriteDashboardLookml body,
+    ITransportSettings? options = null)
+{  
+    return await AuthRequest<Dashboard, Exception>(HttpMethod.Post, "/dashboards/from_lookml", null,body,options);
   }
 
   /// ### Copy an existing dashboard
@@ -3311,8 +4017,8 @@ namespace Looker.SDK.API40
   /// <param name="filter_or">Combine given search criteria in a boolean OR expression</param>
   /// <param name="sorts">Fields to sort by. Sortable fields: [:look_id, :dashboard_id, :deleted, :title]</param>
   public async Task<SdkResponse<DashboardElement[], Exception>> search_dashboard_elements(
-    long? dashboard_id = null,
-    long? look_id = null,
+    string? dashboard_id = null,
+    string? look_id = null,
     string? title = null,
     bool? deleted = null,
     string? fields = null,
@@ -3407,13 +4113,16 @@ namespace Looker.SDK.API40
   /// <returns><c>DashboardElement</c> DashboardElement (application/json)</returns>
   ///
   /// <param name="fields">Requested fields.</param>
+  /// <param name="apply_filters">Apply relevant filters on dashboard to this tile</param>
   public async Task<SdkResponse<DashboardElement, Exception>> create_dashboard_element(
     WriteDashboardElement body,
     string? fields = null,
+    bool? apply_filters = null,
     ITransportSettings? options = null)
 {  
     return await AuthRequest<DashboardElement, Exception>(HttpMethod.Post, "/dashboard_elements", new Values {
-      { "fields", fields }},body,options);
+      { "fields", fields },
+      { "apply_filters", apply_filters }},body,options);
   }
 
   /// ### Get information about the dashboard filters with a specific id.
@@ -3697,9 +4406,10 @@ namespace Looker.SDK.API40
   ///
   /// <param name="datagroup_id">ID of datagroup.</param>
   public async Task<SdkResponse<Datagroup, Exception>> datagroup(
-    long datagroup_id,
+    string datagroup_id,
     ITransportSettings? options = null)
 {  
+      datagroup_id = SdkUtils.EncodeParam(datagroup_id);
     return await AuthRequest<Datagroup, Exception>(HttpMethod.Get, $"/datagroups/{datagroup_id}", null,null,options);
   }
 
@@ -3711,10 +4421,11 @@ namespace Looker.SDK.API40
   ///
   /// <param name="datagroup_id">ID of datagroup.</param>
   public async Task<SdkResponse<Datagroup, Exception>> update_datagroup(
-    long datagroup_id,
+    string datagroup_id,
     WriteDatagroup body,
     ITransportSettings? options = null)
 {  
+      datagroup_id = SdkUtils.EncodeParam(datagroup_id);
     return await AuthRequest<Datagroup, Exception>(HttpMethod.Patch, $"/datagroups/{datagroup_id}", null,body,options);
   }
 
@@ -3764,6 +4475,69 @@ namespace Looker.SDK.API40
       { "workspace", workspace }},null,options);
   }
 
+  /// Enqueue materialization for a PDT with the given model name and view name
+  ///
+  /// GET /derived_table/{model_name}/{view_name}/start -> MaterializePDT
+  ///
+  /// <returns><c>MaterializePDT</c> Derived Table (application/json)</returns>
+  ///
+  /// <param name="model_name">The model of the PDT to start building.</param>
+  /// <param name="view_name">The view name of the PDT to start building.</param>
+  /// <param name="force_rebuild">Force rebuild of required dependent PDTs, even if they are already materialized.</param>
+  /// <param name="force_full_incremental">Force involved incremental PDTs to fully re-materialize.</param>
+  /// <param name="workspace">Workspace in which to materialize selected PDT ('dev' or default 'production').</param>
+  /// <param name="source">The source of this request.</param>
+  public async Task<SdkResponse<MaterializePDT, Exception>> start_pdt_build(
+    string model_name,
+    string view_name,
+    string? force_rebuild = null,
+    string? force_full_incremental = null,
+    string? workspace = null,
+    string? source = null,
+    ITransportSettings? options = null)
+{  
+      model_name = SdkUtils.EncodeParam(model_name);
+      view_name = SdkUtils.EncodeParam(view_name);
+    return await AuthRequest<MaterializePDT, Exception>(HttpMethod.Get, $"/derived_table/{model_name}/{view_name}/start", new Values {
+      { "force_rebuild", force_rebuild },
+      { "force_full_incremental", force_full_incremental },
+      { "workspace", workspace },
+      { "source", source }},null,options);
+  }
+
+  /// Check status of PDT materialization
+  ///
+  /// GET /derived_table/{materialization_id}/status -> MaterializePDT
+  ///
+  /// <returns><c>MaterializePDT</c> Derived Table (application/json)</returns>
+  ///
+  /// <param name="materialization_id">The materialization id to check status for.</param>
+  public async Task<SdkResponse<MaterializePDT, Exception>> check_pdt_build(
+    string materialization_id,
+    ITransportSettings? options = null)
+{  
+      materialization_id = SdkUtils.EncodeParam(materialization_id);
+    return await AuthRequest<MaterializePDT, Exception>(HttpMethod.Get, $"/derived_table/{materialization_id}/status", null,null,options);
+  }
+
+  /// Stop a PDT materialization
+  ///
+  /// GET /derived_table/{materialization_id}/stop -> MaterializePDT
+  ///
+  /// <returns><c>MaterializePDT</c> Derived Table (application/json)</returns>
+  ///
+  /// <param name="materialization_id">The materialization id to stop.</param>
+  /// <param name="source">The source of this request.</param>
+  public async Task<SdkResponse<MaterializePDT, Exception>> stop_pdt_build(
+    string materialization_id,
+    string? source = null,
+    ITransportSettings? options = null)
+{  
+      materialization_id = SdkUtils.EncodeParam(materialization_id);
+    return await AuthRequest<MaterializePDT, Exception>(HttpMethod.Get, $"/derived_table/{materialization_id}/stop", new Values {
+      { "source", source }},null,options);
+  }
+
   #endregion DerivedTable: View Derived Table graphs
 
   #region Folder: Manage Folders
@@ -3775,8 +4549,8 @@ namespace Looker.SDK.API40
   /// <returns><c>Folder[]</c> folders (application/json)</returns>
   ///
   /// <param name="fields">Requested fields.</param>
-  /// <param name="page">Requested page.</param>
-  /// <param name="per_page">Results per page.</param>
+  /// <param name="page">DEPRECATED. Use limit and offset instead. Return only page N of paginated results</param>
+  /// <param name="per_page">DEPRECATED. Use limit and offset instead. Return N rows of data per page</param>
   /// <param name="limit">Number of results to return. (used with offset and takes priority over page and per_page)</param>
   /// <param name="offset">Number of results to skip before returning any. (used with limit and takes priority over page and per_page)</param>
   /// <param name="sorts">Fields to sort by.</param>
@@ -3786,6 +4560,7 @@ namespace Looker.SDK.API40
   /// <param name="creator_id">Filter on folder created by a particular user.</param>
   /// <param name="filter_or">Combine given search criteria in a boolean OR expression</param>
   /// <param name="is_shared_root">Match is shared root</param>
+  /// <param name="is_users_root">Match is users root</param>
   public async Task<SdkResponse<Folder[], Exception>> search_folders(
     string? fields = null,
     long? page = null,
@@ -3794,11 +4569,12 @@ namespace Looker.SDK.API40
     long? offset = null,
     string? sorts = null,
     string? name = null,
-    long? id = null,
+    string? id = null,
     string? parent_id = null,
     string? creator_id = null,
     bool? filter_or = null,
     bool? is_shared_root = null,
+    bool? is_users_root = null,
     ITransportSettings? options = null)
 {  
     return await AuthRequest<Folder[], Exception>(HttpMethod.Get, "/folders/search", new Values {
@@ -3813,7 +4589,8 @@ namespace Looker.SDK.API40
       { "parent_id", parent_id },
       { "creator_id", creator_id },
       { "filter_or", filter_or },
-      { "is_shared_root", is_shared_root }},null,options);
+      { "is_shared_root", is_shared_root },
+      { "is_users_root", is_users_root }},null,options);
   }
 
   /// ### Get information about the folder with a specific id.
@@ -3868,21 +4645,18 @@ namespace Looker.SDK.API40
 
   /// ### Get information about all folders.
   ///
-  /// In API 3.x, this will not return empty personal folders, unless they belong to the calling user,
-  /// or if they contain soft-deleted content.
+  /// All personal folders will be returned.
   ///
-  /// In API 4.0+, all personal folders will be returned.
+  /// GET /folders -> FolderBase[]
   ///
-  /// GET /folders -> Folder[]
-  ///
-  /// <returns><c>Folder[]</c> Folder (application/json)</returns>
+  /// <returns><c>FolderBase[]</c> Folder (application/json)</returns>
   ///
   /// <param name="fields">Requested fields.</param>
-  public async Task<SdkResponse<Folder[], Exception>> all_folders(
+  public async Task<SdkResponse<FolderBase[], Exception>> all_folders(
     string? fields = null,
     ITransportSettings? options = null)
 {  
-    return await AuthRequest<Folder[], Exception>(HttpMethod.Get, "/folders", new Values {
+    return await AuthRequest<FolderBase[], Exception>(HttpMethod.Get, "/folders", new Values {
       { "fields", fields }},null,options);
   }
 
@@ -3910,14 +4684,18 @@ namespace Looker.SDK.API40
   ///
   /// <param name="folder_id">Id of folder</param>
   /// <param name="fields">Requested fields.</param>
-  /// <param name="page">Requested page.</param>
-  /// <param name="per_page">Results per page.</param>
+  /// <param name="page">DEPRECATED. Use limit and offset instead. Return only page N of paginated results</param>
+  /// <param name="per_page">DEPRECATED. Use limit and offset instead. Return N rows of data per page</param>
+  /// <param name="limit">Number of results to return. (used with offset and takes priority over page and per_page)</param>
+  /// <param name="offset">Number of results to skip before returning any. (used with limit and takes priority over page and per_page)</param>
   /// <param name="sorts">Fields to sort by.</param>
   public async Task<SdkResponse<Folder[], Exception>> folder_children(
     string folder_id,
     string? fields = null,
     long? page = null,
     long? per_page = null,
+    long? limit = null,
+    long? offset = null,
     string? sorts = null,
     ITransportSettings? options = null)
 {  
@@ -3926,6 +4704,8 @@ namespace Looker.SDK.API40
       { "fields", fields },
       { "page", page },
       { "per_page", per_page },
+      { "limit", limit },
+      { "offset", offset },
       { "sorts", sorts }},null,options);
   }
 
@@ -3990,7 +4770,6 @@ namespace Looker.SDK.API40
   }
 
   /// ### Get all looks in a folder.
-  /// In API 3.x, this will return all looks in a folder, including looks in the trash.
   /// In API 4.0+, all looks in a folder will be returned, excluding looks in the trash.
   ///
   /// GET /folders/{folder_id}/looks -> LookWithQuery[]
@@ -4038,8 +4817,10 @@ namespace Looker.SDK.API40
   /// <returns><c>Group[]</c> Group (application/json)</returns>
   ///
   /// <param name="fields">Requested fields.</param>
-  /// <param name="page">Requested page.</param>
-  /// <param name="per_page">Results per page.</param>
+  /// <param name="page">DEPRECATED. Use limit and offset instead. Return only page N of paginated results</param>
+  /// <param name="per_page">DEPRECATED. Use limit and offset instead. Return N rows of data per page</param>
+  /// <param name="limit">Number of results to return. (used with offset and takes priority over page and per_page)</param>
+  /// <param name="offset">Number of results to skip before returning any. (used with limit and takes priority over page and per_page)</param>
   /// <param name="sorts">Fields to sort by.</param>
   /// <param name="ids">Optional of ids to get specific groups.</param>
   /// <param name="content_metadata_id">Id of content metadata to which groups must have access.</param>
@@ -4048,9 +4829,11 @@ namespace Looker.SDK.API40
     string? fields = null,
     long? page = null,
     long? per_page = null,
+    long? limit = null,
+    long? offset = null,
     string? sorts = null,
-    DelimArray<long>? ids = null,
-    long? content_metadata_id = null,
+    DelimArray<string>? ids = null,
+    string? content_metadata_id = null,
     bool? can_add_to_content_metadata = null,
     ITransportSettings? options = null)
 {  
@@ -4058,6 +4841,8 @@ namespace Looker.SDK.API40
       { "fields", fields },
       { "page", page },
       { "per_page", per_page },
+      { "limit", limit },
+      { "offset", offset },
       { "sorts", sorts },
       { "ids", ids },
       { "content_metadata_id", content_metadata_id },
@@ -4125,7 +4910,7 @@ namespace Looker.SDK.API40
     long? offset = null,
     string? sorts = null,
     bool? filter_or = null,
-    long? id = null,
+    string? id = null,
     string? name = null,
     string? external_group_id = null,
     bool? externally_managed = null,
@@ -4190,7 +4975,7 @@ namespace Looker.SDK.API40
     long? offset = null,
     string? sorts = null,
     bool? filter_or = null,
-    long? id = null,
+    string? id = null,
     string? name = null,
     string? external_group_id = null,
     bool? externally_managed = null,
@@ -4256,7 +5041,7 @@ namespace Looker.SDK.API40
     long? offset = null,
     string? sorts = null,
     bool? filter_or = null,
-    long? id = null,
+    string? id = null,
     string? name = null,
     string? external_group_id = null,
     bool? externally_managed = null,
@@ -4285,10 +5070,11 @@ namespace Looker.SDK.API40
   /// <param name="group_id">Id of group</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<Group, Exception>> group(
-    long group_id,
+    string group_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      group_id = SdkUtils.EncodeParam(group_id);
     return await AuthRequest<Group, Exception>(HttpMethod.Get, $"/groups/{group_id}", new Values {
       { "fields", fields }},null,options);
   }
@@ -4302,11 +5088,12 @@ namespace Looker.SDK.API40
   /// <param name="group_id">Id of group</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<Group, Exception>> update_group(
-    long group_id,
+    string group_id,
     WriteGroup body,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      group_id = SdkUtils.EncodeParam(group_id);
     return await AuthRequest<Group, Exception>(HttpMethod.Patch, $"/groups/{group_id}", new Values {
       { "fields", fields }},body,options);
   }
@@ -4319,9 +5106,10 @@ namespace Looker.SDK.API40
   ///
   /// <param name="group_id">Id of group</param>
   public async Task<SdkResponse<string, Exception>> delete_group(
-    long group_id,
+    string group_id,
     ITransportSettings? options = null)
 {  
+      group_id = SdkUtils.EncodeParam(group_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/groups/{group_id}", null,null,options);
   }
 
@@ -4334,10 +5122,11 @@ namespace Looker.SDK.API40
   /// <param name="group_id">Id of group</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<Group[], Exception>> all_group_groups(
-    long group_id,
+    string group_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      group_id = SdkUtils.EncodeParam(group_id);
     return await AuthRequest<Group[], Exception>(HttpMethod.Get, $"/groups/{group_id}/groups", new Values {
       { "fields", fields }},null,options);
   }
@@ -4350,10 +5139,11 @@ namespace Looker.SDK.API40
   ///
   /// <param name="group_id">Id of group</param>
   public async Task<SdkResponse<Group, Exception>> add_group_group(
-    long group_id,
+    string group_id,
     GroupIdForGroupInclusion body,
     ITransportSettings? options = null)
 {  
+      group_id = SdkUtils.EncodeParam(group_id);
     return await AuthRequest<Group, Exception>(HttpMethod.Post, $"/groups/{group_id}/groups", null,body,options);
   }
 
@@ -4365,21 +5155,28 @@ namespace Looker.SDK.API40
   ///
   /// <param name="group_id">Id of group</param>
   /// <param name="fields">Requested fields.</param>
-  /// <param name="page">Requested page.</param>
-  /// <param name="per_page">Results per page.</param>
+  /// <param name="page">DEPRECATED. Use limit and offset instead. Return only page N of paginated results</param>
+  /// <param name="per_page">DEPRECATED. Use limit and offset instead. Return N rows of data per page</param>
+  /// <param name="limit">Number of results to return. (used with offset and takes priority over page and per_page)</param>
+  /// <param name="offset">Number of results to skip before returning any. (used with limit and takes priority over page and per_page)</param>
   /// <param name="sorts">Fields to sort by.</param>
   public async Task<SdkResponse<User[], Exception>> all_group_users(
-    long group_id,
+    string group_id,
     string? fields = null,
     long? page = null,
     long? per_page = null,
+    long? limit = null,
+    long? offset = null,
     string? sorts = null,
     ITransportSettings? options = null)
 {  
+      group_id = SdkUtils.EncodeParam(group_id);
     return await AuthRequest<User[], Exception>(HttpMethod.Get, $"/groups/{group_id}/users", new Values {
       { "fields", fields },
       { "page", page },
       { "per_page", per_page },
+      { "limit", limit },
+      { "offset", offset },
       { "sorts", sorts }},null,options);
   }
 
@@ -4391,10 +5188,11 @@ namespace Looker.SDK.API40
   ///
   /// <param name="group_id">Id of group</param>
   public async Task<SdkResponse<User, Exception>> add_group_user(
-    long group_id,
+    string group_id,
     GroupIdForGroupUserInclusion body,
     ITransportSettings? options = null)
 {  
+      group_id = SdkUtils.EncodeParam(group_id);
     return await AuthRequest<User, Exception>(HttpMethod.Post, $"/groups/{group_id}/users", null,body,options);
   }
 
@@ -4407,10 +5205,12 @@ namespace Looker.SDK.API40
   /// <param name="group_id">Id of group</param>
   /// <param name="user_id">Id of user to remove from group</param>
   public async Task<SdkResponse<string, Exception>> delete_group_user(
-    long group_id,
-    long user_id,
+    string group_id,
+    string user_id,
     ITransportSettings? options = null)
 {  
+      group_id = SdkUtils.EncodeParam(group_id);
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/groups/{group_id}/users/{user_id}", null,null,options);
   }
 
@@ -4423,10 +5223,12 @@ namespace Looker.SDK.API40
   /// <param name="group_id">Id of group</param>
   /// <param name="deleting_group_id">Id of group to delete</param>
   public async Task<SdkResponse<string, Exception>> delete_group_from_group(
-    long group_id,
-    long deleting_group_id,
+    string group_id,
+    string deleting_group_id,
     ITransportSettings? options = null)
 {  
+      group_id = SdkUtils.EncodeParam(group_id);
+      deleting_group_id = SdkUtils.EncodeParam(deleting_group_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/groups/{group_id}/groups/{deleting_group_id}", null,null,options);
   }
 
@@ -4441,11 +5243,13 @@ namespace Looker.SDK.API40
   /// <param name="group_id">Id of group</param>
   /// <param name="user_attribute_id">Id of user attribute</param>
   public async Task<SdkResponse<UserAttributeGroupValue, Exception>> update_user_attribute_group_value(
-    long group_id,
-    long user_attribute_id,
+    string group_id,
+    string user_attribute_id,
     UserAttributeGroupValue body,
     ITransportSettings? options = null)
 {  
+      group_id = SdkUtils.EncodeParam(group_id);
+      user_attribute_id = SdkUtils.EncodeParam(user_attribute_id);
     return await AuthRequest<UserAttributeGroupValue, Exception>(HttpMethod.Patch, $"/groups/{group_id}/attribute_values/{user_attribute_id}", null,body,options);
   }
 
@@ -4458,10 +5262,12 @@ namespace Looker.SDK.API40
   /// <param name="group_id">Id of group</param>
   /// <param name="user_attribute_id">Id of user attribute</param>
   public async Task<SdkResponse<string, Exception>> delete_user_attribute_group_value(
-    long group_id,
-    long user_attribute_id,
+    string group_id,
+    string user_attribute_id,
     ITransportSettings? options = null)
 {  
+      group_id = SdkUtils.EncodeParam(group_id);
+      user_attribute_id = SdkUtils.EncodeParam(user_attribute_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/groups/{group_id}/attribute_values/{user_attribute_id}", null,null,options);
   }
 
@@ -4527,13 +5333,14 @@ namespace Looker.SDK.API40
   ///
   /// <returns><c>IntegrationHub</c> Integration Hub (application/json)</returns>
   ///
-  /// <param name="integration_hub_id">Id of Integration Hub</param>
+  /// <param name="integration_hub_id">Id of integration_hub</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<IntegrationHub, Exception>> integration_hub(
-    long integration_hub_id,
+    string integration_hub_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      integration_hub_id = SdkUtils.EncodeParam(integration_hub_id);
     return await AuthRequest<IntegrationHub, Exception>(HttpMethod.Get, $"/integration_hubs/{integration_hub_id}", new Values {
       { "fields", fields }},null,options);
   }
@@ -4546,14 +5353,15 @@ namespace Looker.SDK.API40
   ///
   /// <returns><c>IntegrationHub</c> Integration Hub (application/json)</returns>
   ///
-  /// <param name="integration_hub_id">Id of Integration Hub</param>
+  /// <param name="integration_hub_id">Id of integration_hub</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<IntegrationHub, Exception>> update_integration_hub(
-    long integration_hub_id,
+    string integration_hub_id,
     WriteIntegrationHub body,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      integration_hub_id = SdkUtils.EncodeParam(integration_hub_id);
     return await AuthRequest<IntegrationHub, Exception>(HttpMethod.Patch, $"/integration_hubs/{integration_hub_id}", new Values {
       { "fields", fields }},body,options);
   }
@@ -4566,9 +5374,10 @@ namespace Looker.SDK.API40
   ///
   /// <param name="integration_hub_id">Id of integration_hub</param>
   public async Task<SdkResponse<string, Exception>> delete_integration_hub(
-    long integration_hub_id,
+    string integration_hub_id,
     ITransportSettings? options = null)
 {  
+      integration_hub_id = SdkUtils.EncodeParam(integration_hub_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/integration_hubs/{integration_hub_id}", null,null,options);
   }
 
@@ -4580,9 +5389,10 @@ namespace Looker.SDK.API40
   ///
   /// <param name="integration_hub_id">Id of integration_hub</param>
   public async Task<SdkResponse<IntegrationHub, Exception>> accept_integration_hub_legal_agreement(
-    long integration_hub_id,
+    string integration_hub_id,
     ITransportSettings? options = null)
 {  
+      integration_hub_id = SdkUtils.EncodeParam(integration_hub_id);
     return await AuthRequest<IntegrationHub, Exception>(HttpMethod.Post, $"/integration_hubs/{integration_hub_id}/accept_legal_agreement", null,null,options);
   }
 
@@ -4763,8 +5573,8 @@ namespace Looker.SDK.API40
   /// <param name="curate">Exclude items that exist only in personal spaces other than the users</param>
   /// <param name="last_viewed_at">Select looks based on when they were last viewed</param>
   /// <param name="fields">Requested fields.</param>
-  /// <param name="page">Requested page.</param>
-  /// <param name="per_page">Results per page.</param>
+  /// <param name="page">DEPRECATED. Use limit and offset instead. Return only page N of paginated results</param>
+  /// <param name="per_page">DEPRECATED. Use limit and offset instead. Return N rows of data per page</param>
   /// <param name="limit">Number of results to return. (used with offset and takes priority over page and per_page)</param>
   /// <param name="offset">Number of results to skip before returning any. (used with limit and takes priority over page and per_page)</param>
   /// <param name="sorts">One or more fields to sort results by. Sortable fields: [:title, :user_id, :id, :created_at, :space_id, :folder_id, :description, :updated_at, :last_updater_id, :view_count, :favorite_count, :content_favorite_id, :deleted, :deleted_at, :last_viewed_at, :last_accessed_at, :query_id]</param>
@@ -4778,7 +5588,7 @@ namespace Looker.SDK.API40
     string? user_id = null,
     string? view_count = null,
     bool? deleted = null,
-    long? query_id = null,
+    string? query_id = null,
     bool? curate = null,
     string? last_viewed_at = null,
     string? fields = null,
@@ -4847,7 +5657,7 @@ namespace Looker.SDK.API40
   ///
   /// Soft-deleted looks are excluded from the results of [all_looks()](#!/Look/all_looks) and [search_looks()](#!/Look/search_looks), so they
   /// essentially disappear from view even though they still reside in the db.
-  /// In API 3.1 and later, you can pass `deleted: true` as a parameter to [search_looks()](#!/3.1/Look/search_looks) to list soft-deleted looks.
+  /// You can pass `deleted: true` as a parameter to [search_looks()](#!/Look/search_looks) to list soft-deleted looks.
   ///
   /// NOTE: [delete_look()](#!/Look/delete_look) performs a "hard delete" - the look data is removed from the Looker
   /// database and destroyed. There is no "undo" for `delete_look()`.
@@ -4899,7 +5709,8 @@ namespace Looker.SDK.API40
   /// | result_format | Description
   /// | :-----------: | :--- |
   /// | json | Plain json
-  /// | json_detail | Row data plus metadata describing the fields, pivots, table calcs, and other aspects of the query
+  /// | json_bi | (*RECOMMENDED*) Row data plus metadata describing the fields, pivots, table calcs, and other aspects of the query. See JsonBi type for schema
+  /// | json_detail | (*LEGACY*) Row data plus metadata describing the fields, pivots, table calcs, and other aspects of the query
   /// | csv | Comma separated values with a header
   /// | txt | Tab separated values with a header
   /// | html | Simple html
@@ -4929,7 +5740,7 @@ namespace Looker.SDK.API40
   /// <param name="image_width">Render width for image formats.</param>
   /// <param name="image_height">Render height for image formats.</param>
   /// <param name="generate_drill_links">Generate drill links (only applicable to 'json_detail' format.</param>
-  /// <param name="force_production">Force use of production models even if the user is in development mode.</param>
+  /// <param name="force_production">Force use of production models even if the user is in development mode. Note that this flag being false does not guarantee development models will be used.</param>
   /// <param name="cache_only">Retrieve any results from cache even if the results have expired.</param>
   /// <param name="path_prefix">Prefix to use for drill links (url encoded).</param>
   /// <param name="rebuild_pdts">Rebuild PDTS used in query.</param>
@@ -5111,16 +5922,19 @@ namespace Looker.SDK.API40
   /// <param name="lookml_model_name">Name of lookml model.</param>
   /// <param name="explore_name">Name of explore.</param>
   /// <param name="fields">Requested fields.</param>
+  /// <param name="add_drills_metadata">Whether response should include drill field metadata.</param>
   public async Task<SdkResponse<LookmlModelExplore, Exception>> lookml_model_explore(
     string lookml_model_name,
     string explore_name,
     string? fields = null,
+    bool? add_drills_metadata = null,
     ITransportSettings? options = null)
 {  
       lookml_model_name = SdkUtils.EncodeParam(lookml_model_name);
       explore_name = SdkUtils.EncodeParam(explore_name);
     return await AuthRequest<LookmlModelExplore, Exception>(HttpMethod.Get, $"/lookml_models/{lookml_model_name}/explores/{explore_name}", new Values {
-      { "fields", fields }},null,options);
+      { "fields", fields },
+      { "add_drills_metadata", add_drills_metadata }},null,options);
   }
 
   #endregion LookmlModel: Manage LookML Models
@@ -6005,8 +6819,6 @@ namespace Looker.SDK.API40
 
   /// ### Creates a tag for the most recent commit, or a specific ref is a SHA is provided
   ///
-  /// This is an internal-only, undocumented route.
-  ///
   /// POST /projects/{project_id}/tag -> Project
   ///
   /// <returns>
@@ -6116,10 +6928,8 @@ namespace Looker.SDK.API40
   /// <param name="apply_formatting">Apply model-specified formatting to each result.</param>
   /// <param name="apply_vis">Apply visualization options to results.</param>
   /// <param name="cache">Get results from cache if available.</param>
-  /// <param name="image_width">Render width for image formats.</param>
-  /// <param name="image_height">Render height for image formats.</param>
   /// <param name="generate_drill_links">Generate drill links (only applicable to 'json_detail' format.</param>
-  /// <param name="force_production">Force use of production models even if the user is in development mode.</param>
+  /// <param name="force_production">Force use of production models even if the user is in development mode. Note that this flag being false does not guarantee development models will be used.</param>
   /// <param name="cache_only">Retrieve any results from cache even if the results have expired.</param>
   /// <param name="path_prefix">Prefix to use for drill links (url encoded).</param>
   /// <param name="rebuild_pdts">Rebuild PDTS used in query.</param>
@@ -6131,8 +6941,6 @@ namespace Looker.SDK.API40
     bool? apply_formatting = null,
     bool? apply_vis = null,
     bool? cache = null,
-    long? image_width = null,
-    long? image_height = null,
     bool? generate_drill_links = null,
     bool? force_production = null,
     bool? cache_only = null,
@@ -6147,8 +6955,6 @@ namespace Looker.SDK.API40
       { "apply_formatting", apply_formatting },
       { "apply_vis", apply_vis },
       { "cache", cache },
-      { "image_width", image_width },
-      { "image_height", image_height },
       { "generate_drill_links", generate_drill_links },
       { "force_production", force_production },
       { "cache_only", cache_only },
@@ -6270,10 +7076,11 @@ namespace Looker.SDK.API40
   /// <param name="query_id">Id of query</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<Query, Exception>> query(
-    long query_id,
+    string query_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      query_id = SdkUtils.EncodeParam(query_id);
     return await AuthRequest<Query, Exception>(HttpMethod.Get, $"/queries/{query_id}", new Values {
       { "fields", fields }},null,options);
   }
@@ -6347,7 +7154,8 @@ namespace Looker.SDK.API40
   /// | result_format | Description
   /// | :-----------: | :--- |
   /// | json | Plain json
-  /// | json_detail | Row data plus metadata describing the fields, pivots, table calcs, and other aspects of the query
+  /// | json_bi | (*RECOMMENDED*) Row data plus metadata describing the fields, pivots, table calcs, and other aspects of the query. See JsonBi type for schema
+  /// | json_detail | (*LEGACY*) Row data plus metadata describing the fields, pivots, table calcs, and other aspects of the query
   /// | csv | Comma separated values with a header
   /// | txt | Tab separated values with a header
   /// | html | Simple html
@@ -6377,14 +7185,14 @@ namespace Looker.SDK.API40
   /// <param name="image_width">Render width for image formats.</param>
   /// <param name="image_height">Render height for image formats.</param>
   /// <param name="generate_drill_links">Generate drill links (only applicable to 'json_detail' format.</param>
-  /// <param name="force_production">Force use of production models even if the user is in development mode.</param>
+  /// <param name="force_production">Force use of production models even if the user is in development mode. Note that this flag being false does not guarantee development models will be used.</param>
   /// <param name="cache_only">Retrieve any results from cache even if the results have expired.</param>
   /// <param name="path_prefix">Prefix to use for drill links (url encoded).</param>
   /// <param name="rebuild_pdts">Rebuild PDTS used in query.</param>
   /// <param name="server_table_calcs">Perform table calculations on query results</param>
   /// <param name="source">Specifies the source of this call.</param>
   public async Task<SdkResponse<TSuccess, Exception>> run_query<TSuccess>(
-    long query_id,
+    string query_id,
     string result_format,
     long? limit = null,
     bool? apply_formatting = null,
@@ -6401,6 +7209,7 @@ namespace Looker.SDK.API40
     string? source = null,
     ITransportSettings? options = null) where TSuccess : class
 {  
+      query_id = SdkUtils.EncodeParam(query_id);
       result_format = SdkUtils.EncodeParam(result_format);
     return await AuthRequest<TSuccess, Exception>(HttpMethod.Get, $"/queries/{query_id}/run/{result_format}", new Values {
       { "limit", limit },
@@ -6459,7 +7268,8 @@ namespace Looker.SDK.API40
   /// | result_format | Description
   /// | :-----------: | :--- |
   /// | json | Plain json
-  /// | json_detail | Row data plus metadata describing the fields, pivots, table calcs, and other aspects of the query
+  /// | json_bi | (*RECOMMENDED*) Row data plus metadata describing the fields, pivots, table calcs, and other aspects of the query. See JsonBi type for schema
+  /// | json_detail | (*LEGACY*) Row data plus metadata describing the fields, pivots, table calcs, and other aspects of the query
   /// | csv | Comma separated values with a header
   /// | txt | Tab separated values with a header
   /// | html | Simple html
@@ -6488,7 +7298,7 @@ namespace Looker.SDK.API40
   /// <param name="image_width">Render width for image formats.</param>
   /// <param name="image_height">Render height for image formats.</param>
   /// <param name="generate_drill_links">Generate drill links (only applicable to 'json_detail' format.</param>
-  /// <param name="force_production">Force use of production models even if the user is in development mode.</param>
+  /// <param name="force_production">Force use of production models even if the user is in development mode. Note that this flag being false does not guarantee development models will be used.</param>
   /// <param name="cache_only">Retrieve any results from cache even if the results have expired.</param>
   /// <param name="path_prefix">Prefix to use for drill links (url encoded).</param>
   /// <param name="rebuild_pdts">Rebuild PDTS used in query.</param>
@@ -6543,7 +7353,7 @@ namespace Looker.SDK.API40
   /// Here is an example inline query URL:
   ///
   /// ```
-  /// https://looker.mycompany.com:19999/api/3.0/queries/models/thelook/views/inventory_items/run/json?fields=category.name,inventory_items.days_in_inventory_tier,products.count&f[category.name]=socks&sorts=products.count+desc+0&limit=500&query_timezone=America/Los_Angeles
+  /// https://looker.mycompany.com:19999/api/4.0/queries/models/thelook/views/inventory_items/run/json?fields=category.name,inventory_items.days_in_inventory_tier,products.count&f[category.name]=socks&sorts=products.count+desc+0&limit=500&query_timezone=America/Los_Angeles
   /// ```
   ///
   /// When invoking this endpoint with the Ruby SDK, pass the query parameter parts as a hash. The hash to match the above would look like:
@@ -6551,11 +7361,11 @@ namespace Looker.SDK.API40
   /// ```ruby
   /// query_params =
   /// {
-  ///   :fields => "category.name,inventory_items.days_in_inventory_tier,products.count",
+  ///   fields: "category.name,inventory_items.days_in_inventory_tier,products.count",
   ///   :"f[category.name]" => "socks",
-  ///   :sorts => "products.count desc 0",
-  ///   :limit => "500",
-  ///   :query_timezone => "America/Los_Angeles"
+  ///   sorts: "products.count desc 0",
+  ///   limit: "500",
+  ///   query_timezone: "America/Los_Angeles"
   /// }
   /// response = ruby_sdk.run_url_encoded_query('thelook','inventory_items','json', query_params)
   ///
@@ -6569,7 +7379,8 @@ namespace Looker.SDK.API40
   /// | result_format | Description
   /// | :-----------: | :--- |
   /// | json | Plain json
-  /// | json_detail | Row data plus metadata describing the fields, pivots, table calcs, and other aspects of the query
+  /// | json_bi | (*RECOMMENDED*) Row data plus metadata describing the fields, pivots, table calcs, and other aspects of the query. See JsonBi type for schema
+  /// | json_detail | (*LEGACY*) Row data plus metadata describing the fields, pivots, table calcs, and other aspects of the query
   /// | csv | Comma separated values with a header
   /// | txt | Tab separated values with a header
   /// | html | Simple html
@@ -6684,21 +7495,6 @@ namespace Looker.SDK.API40
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/running_queries/{query_task_id}", null,null,options);
   }
 
-  /// Get a SQL Runner query.
-  ///
-  /// GET /sql_queries/{slug} -> SqlQuery
-  ///
-  /// <returns><c>SqlQuery</c> SQL Runner Query (application/json)</returns>
-  ///
-  /// <param name="slug">slug of query</param>
-  public async Task<SdkResponse<SqlQuery, Exception>> sql_query(
-    string slug,
-    ITransportSettings? options = null)
-{  
-      slug = SdkUtils.EncodeParam(slug);
-    return await AuthRequest<SqlQuery, Exception>(HttpMethod.Get, $"/sql_queries/{slug}", null,null,options);
-  }
-
   /// ### Create a SQL Runner Query
   ///
   /// Either the `connection_name` or `model_name` parameter MUST be provided.
@@ -6714,21 +7510,32 @@ namespace Looker.SDK.API40
     return await AuthRequest<SqlQuery, Exception>(HttpMethod.Post, "/sql_queries", null,body,options);
   }
 
+  /// Get a SQL Runner query.
+  ///
+  /// GET /sql_queries/{slug} -> SqlQuery
+  ///
+  /// <returns><c>SqlQuery</c> SQL Runner Query (application/json)</returns>
+  ///
+  /// <param name="slug">slug of query</param>
+  public async Task<SdkResponse<SqlQuery, Exception>> sql_query(
+    string slug,
+    ITransportSettings? options = null)
+{  
+      slug = SdkUtils.EncodeParam(slug);
+    return await AuthRequest<SqlQuery, Exception>(HttpMethod.Get, $"/sql_queries/{slug}", null,null,options);
+  }
+
   /// Execute a SQL Runner query in a given result_format.
   ///
   /// POST /sql_queries/{slug}/run/{result_format} -> string
   ///
-  /// **Note**: Binary content may be returned by this method.
-  ///
   /// <returns>
   /// <c>string</c> SQL Runner Query (text)
   /// <c>string</c> SQL Runner Query (application/json)
-  /// <c>string</c> SQL Runner Query (image/png)
-  /// <c>string</c> SQL Runner Query (image/jpeg)
   /// </returns>
   ///
   /// <param name="slug">slug of query</param>
-  /// <param name="result_format">Format of result, options are: ["inline_json", "json", "json_detail", "json_fe", "csv", "html", "md", "txt", "xlsx", "gsxml", "json_label"]</param>
+  /// <param name="result_format">Format of result, options are: ["inline_json", "json", "json_detail", "json_fe", "json_bi", "csv", "html", "md", "txt", "xlsx", "gsxml", "sql", "json_label"]</param>
   /// <param name="download">Defaults to false. If set to true, the HTTP response will have content-disposition and other headers set to make the HTTP response behave as a downloadable attachment instead of as inline content.</param>
   public async Task<SdkResponse<TSuccess, Exception>> run_sql_query<TSuccess>(
     string slug,
@@ -6762,13 +7569,14 @@ namespace Looker.SDK.API40
   /// <param name="height">Output height in pixels</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<RenderTask, Exception>> create_look_render_task(
-    long look_id,
+    string look_id,
     string result_format,
     long width,
     long height,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      look_id = SdkUtils.EncodeParam(look_id);
       result_format = SdkUtils.EncodeParam(result_format);
     return await AuthRequest<RenderTask, Exception>(HttpMethod.Post, $"/render_tasks/looks/{look_id}/{result_format}", new Values {
       { "width", width },
@@ -6792,13 +7600,14 @@ namespace Looker.SDK.API40
   /// <param name="height">Output height in pixels</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<RenderTask, Exception>> create_query_render_task(
-    long query_id,
+    string query_id,
     string result_format,
     long width,
     long height,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      query_id = SdkUtils.EncodeParam(query_id);
       result_format = SdkUtils.EncodeParam(result_format);
     return await AuthRequest<RenderTask, Exception>(HttpMethod.Post, $"/render_tasks/queries/{query_id}/{result_format}", new Values {
       { "width", width },
@@ -6824,6 +7633,7 @@ namespace Looker.SDK.API40
   /// <param name="pdf_paper_size">Paper size for pdf. Value can be one of: ["letter","legal","tabloid","a0","a1","a2","a3","a4","a5"]</param>
   /// <param name="pdf_landscape">Whether to render pdf in landscape paper orientation</param>
   /// <param name="long_tables">Whether or not to expand table vis to full length</param>
+  /// <param name="theme">Theme to apply. Will render embedded version of dashboard if valid</param>
   public async Task<SdkResponse<RenderTask, Exception>> create_dashboard_render_task(
     string dashboard_id,
     string result_format,
@@ -6834,6 +7644,7 @@ namespace Looker.SDK.API40
     string? pdf_paper_size = null,
     bool? pdf_landscape = null,
     bool? long_tables = null,
+    string? theme = null,
     ITransportSettings? options = null)
 {  
       dashboard_id = SdkUtils.EncodeParam(dashboard_id);
@@ -6844,7 +7655,8 @@ namespace Looker.SDK.API40
       { "fields", fields },
       { "pdf_paper_size", pdf_paper_size },
       { "pdf_landscape", pdf_landscape },
-      { "long_tables", long_tables }},body,options);
+      { "long_tables", long_tables },
+      { "theme", theme }},body,options);
   }
 
   /// ### Get information about a render task.
@@ -6982,7 +7794,7 @@ namespace Looker.SDK.API40
     long? limit = null,
     long? offset = null,
     string? sorts = null,
-    long? id = null,
+    string? id = null,
     string? name = null,
     bool? all_access = null,
     bool? built_in = null,
@@ -7010,10 +7822,11 @@ namespace Looker.SDK.API40
   /// <param name="model_set_id">Id of model set</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<ModelSet, Exception>> model_set(
-    long model_set_id,
+    string model_set_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      model_set_id = SdkUtils.EncodeParam(model_set_id);
     return await AuthRequest<ModelSet, Exception>(HttpMethod.Get, $"/model_sets/{model_set_id}", new Values {
       { "fields", fields }},null,options);
   }
@@ -7026,10 +7839,11 @@ namespace Looker.SDK.API40
   ///
   /// <param name="model_set_id">id of model set</param>
   public async Task<SdkResponse<ModelSet, Exception>> update_model_set(
-    long model_set_id,
+    string model_set_id,
     WriteModelSet body,
     ITransportSettings? options = null)
 {  
+      model_set_id = SdkUtils.EncodeParam(model_set_id);
     return await AuthRequest<ModelSet, Exception>(HttpMethod.Patch, $"/model_sets/{model_set_id}", null,body,options);
   }
 
@@ -7037,13 +7851,14 @@ namespace Looker.SDK.API40
   ///
   /// DELETE /model_sets/{model_set_id} -> string
   ///
-  /// <returns><c>string</c> Model set succssfully deleted. (application/json)</returns>
+  /// <returns><c>string</c> Model set successfully deleted. (application/json)</returns>
   ///
   /// <param name="model_set_id">id of model set</param>
   public async Task<SdkResponse<string, Exception>> delete_model_set(
-    long model_set_id,
+    string model_set_id,
     ITransportSettings? options = null)
 {  
+      model_set_id = SdkUtils.EncodeParam(model_set_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/model_sets/{model_set_id}", null,null,options);
   }
 
@@ -7128,7 +7943,7 @@ namespace Looker.SDK.API40
     long? limit = null,
     long? offset = null,
     string? sorts = null,
-    long? id = null,
+    string? id = null,
     string? name = null,
     bool? all_access = null,
     bool? built_in = null,
@@ -7156,26 +7971,29 @@ namespace Looker.SDK.API40
   /// <param name="permission_set_id">Id of permission set</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<PermissionSet, Exception>> permission_set(
-    long permission_set_id,
+    string permission_set_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      permission_set_id = SdkUtils.EncodeParam(permission_set_id);
     return await AuthRequest<PermissionSet, Exception>(HttpMethod.Get, $"/permission_sets/{permission_set_id}", new Values {
       { "fields", fields }},null,options);
   }
 
   /// ### Update information about the permission set with a specific id.
+  /// Providing save_content permission alone will also provide you the abilities of save_looks and save_dashboards.
   ///
   /// PATCH /permission_sets/{permission_set_id} -> PermissionSet
   ///
   /// <returns><c>PermissionSet</c> Permission Set (application/json)</returns>
   ///
-  /// <param name="permission_set_id">id of permission set</param>
+  /// <param name="permission_set_id">Id of permission set</param>
   public async Task<SdkResponse<PermissionSet, Exception>> update_permission_set(
-    long permission_set_id,
+    string permission_set_id,
     WritePermissionSet body,
     ITransportSettings? options = null)
 {  
+      permission_set_id = SdkUtils.EncodeParam(permission_set_id);
     return await AuthRequest<PermissionSet, Exception>(HttpMethod.Patch, $"/permission_sets/{permission_set_id}", null,body,options);
   }
 
@@ -7187,9 +8005,10 @@ namespace Looker.SDK.API40
   ///
   /// <param name="permission_set_id">Id of permission set</param>
   public async Task<SdkResponse<string, Exception>> delete_permission_set(
-    long permission_set_id,
+    string permission_set_id,
     ITransportSettings? options = null)
 {  
+      permission_set_id = SdkUtils.EncodeParam(permission_set_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/permission_sets/{permission_set_id}", null,null,options);
   }
 
@@ -7209,6 +8028,7 @@ namespace Looker.SDK.API40
   }
 
   /// ### Create a permission set with the specified information. Permission sets are used by Roles.
+  /// Providing save_content permission alone will also provide you the abilities of save_looks and save_dashboards.
   ///
   /// POST /permission_sets -> PermissionSet
   ///
@@ -7231,7 +8051,7 @@ namespace Looker.SDK.API40
   /// <param name="ids">Optional list of ids to get specific roles.</param>
   public async Task<SdkResponse<Role[], Exception>> all_roles(
     string? fields = null,
-    DelimArray<long>? ids = null,
+    DelimArray<string>? ids = null,
     ITransportSettings? options = null)
 {  
     return await AuthRequest<Role[], Exception>(HttpMethod.Get, "/roles", new Values {
@@ -7289,15 +8109,17 @@ namespace Looker.SDK.API40
   /// <param name="name">Match role name.</param>
   /// <param name="built_in">Match roles by built_in status.</param>
   /// <param name="filter_or">Combine given search criteria in a boolean OR expression.</param>
+  /// <param name="is_support_role">Search for Looker support roles.</param>
   public async Task<SdkResponse<Role[], Exception>> search_roles(
     string? fields = null,
     long? limit = null,
     long? offset = null,
     string? sorts = null,
-    long? id = null,
+    string? id = null,
     string? name = null,
     bool? built_in = null,
     bool? filter_or = null,
+    bool? is_support_role = null,
     ITransportSettings? options = null)
 {  
     return await AuthRequest<Role[], Exception>(HttpMethod.Get, "/roles/search", new Values {
@@ -7308,7 +8130,8 @@ namespace Looker.SDK.API40
       { "id", id },
       { "name", name },
       { "built_in", built_in },
-      { "filter_or", filter_or }},null,options);
+      { "filter_or", filter_or },
+      { "is_support_role", is_support_role }},null,options);
   }
 
   /// ### Search roles include user count
@@ -7354,7 +8177,7 @@ namespace Looker.SDK.API40
     long? limit = null,
     long? offset = null,
     string? sorts = null,
-    long? id = null,
+    string? id = null,
     string? name = null,
     bool? built_in = null,
     bool? filter_or = null,
@@ -7379,9 +8202,10 @@ namespace Looker.SDK.API40
   ///
   /// <param name="role_id">id of role</param>
   public async Task<SdkResponse<Role, Exception>> role(
-    long role_id,
+    string role_id,
     ITransportSettings? options = null)
 {  
+      role_id = SdkUtils.EncodeParam(role_id);
     return await AuthRequest<Role, Exception>(HttpMethod.Get, $"/roles/{role_id}", null,null,options);
   }
 
@@ -7393,10 +8217,11 @@ namespace Looker.SDK.API40
   ///
   /// <param name="role_id">id of role</param>
   public async Task<SdkResponse<Role, Exception>> update_role(
-    long role_id,
+    string role_id,
     WriteRole body,
     ITransportSettings? options = null)
 {  
+      role_id = SdkUtils.EncodeParam(role_id);
     return await AuthRequest<Role, Exception>(HttpMethod.Patch, $"/roles/{role_id}", null,body,options);
   }
 
@@ -7408,9 +8233,10 @@ namespace Looker.SDK.API40
   ///
   /// <param name="role_id">id of role</param>
   public async Task<SdkResponse<string, Exception>> delete_role(
-    long role_id,
+    string role_id,
     ITransportSettings? options = null)
 {  
+      role_id = SdkUtils.EncodeParam(role_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/roles/{role_id}", null,null,options);
   }
 
@@ -7423,26 +8249,30 @@ namespace Looker.SDK.API40
   /// <param name="role_id">id of role</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<Group[], Exception>> role_groups(
-    long role_id,
+    string role_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      role_id = SdkUtils.EncodeParam(role_id);
     return await AuthRequest<Group[], Exception>(HttpMethod.Get, $"/roles/{role_id}/groups", new Values {
       { "fields", fields }},null,options);
   }
 
   /// ### Set all groups for a role, removing all existing group associations from that role.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// PUT /roles/{role_id}/groups -> Group[]
   ///
   /// <returns><c>Group[]</c> Groups with role. (application/json)</returns>
   ///
-  /// <param name="role_id">Id of Role</param>
+  /// <param name="role_id">id of role</param>
   public async Task<SdkResponse<Group[], Exception>> set_role_groups(
-    long role_id,
-    long[] body,
+    string role_id,
+    string[] body,
     ITransportSettings? options = null)
 {  
+      role_id = SdkUtils.EncodeParam(role_id);
     return await AuthRequest<Group[], Exception>(HttpMethod.Put, $"/roles/{role_id}/groups", null,body,options);
   }
 
@@ -7452,15 +8282,16 @@ namespace Looker.SDK.API40
   ///
   /// <returns><c>User[]</c> Users with role. (application/json)</returns>
   ///
-  /// <param name="role_id">id of user</param>
+  /// <param name="role_id">id of role</param>
   /// <param name="fields">Requested fields.</param>
   /// <param name="direct_association_only">Get only users associated directly with the role: exclude those only associated through groups.</param>
   public async Task<SdkResponse<User[], Exception>> role_users(
-    long role_id,
+    string role_id,
     string? fields = null,
     bool? direct_association_only = null,
     ITransportSettings? options = null)
 {  
+      role_id = SdkUtils.EncodeParam(role_id);
     return await AuthRequest<User[], Exception>(HttpMethod.Get, $"/roles/{role_id}/users", new Values {
       { "fields", fields },
       { "direct_association_only", direct_association_only }},null,options);
@@ -7474,10 +8305,11 @@ namespace Looker.SDK.API40
   ///
   /// <param name="role_id">id of role</param>
   public async Task<SdkResponse<User[], Exception>> set_role_users(
-    long role_id,
-    long[] body,
+    string role_id,
+    string[] body,
     ITransportSettings? options = null)
 {  
+      role_id = SdkUtils.EncodeParam(role_id);
     return await AuthRequest<User[], Exception>(HttpMethod.Put, $"/roles/{role_id}/users", null,body,options);
   }
 
@@ -7496,10 +8328,11 @@ namespace Looker.SDK.API40
   /// <param name="space_id">Space Id</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<ScheduledPlan[], Exception>> scheduled_plans_for_space(
-    long space_id,
+    string space_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      space_id = SdkUtils.EncodeParam(space_id);
     return await AuthRequest<ScheduledPlan[], Exception>(HttpMethod.Get, $"/scheduled_plans/space/{space_id}", new Values {
       { "fields", fields }},null,options);
   }
@@ -7515,10 +8348,11 @@ namespace Looker.SDK.API40
   /// <param name="scheduled_plan_id">Scheduled Plan Id</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<ScheduledPlan, Exception>> scheduled_plan(
-    long scheduled_plan_id,
+    string scheduled_plan_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      scheduled_plan_id = SdkUtils.EncodeParam(scheduled_plan_id);
     return await AuthRequest<ScheduledPlan, Exception>(HttpMethod.Get, $"/scheduled_plans/{scheduled_plan_id}", new Values {
       { "fields", fields }},null,options);
   }
@@ -7541,7 +8375,7 @@ namespace Looker.SDK.API40
   /// #### Email Permissions:
   ///
   /// For details about permissions required to schedule delivery to email and the safeguards
-  /// Looker offers to protect against sending to unauthorized email destinations, see [Email Domain Whitelist for Scheduled Looks](https://docs.looker.com/r/api/embed-permissions).
+  /// Looker offers to protect against sending to unauthorized email destinations, see [Email Domain Allow List for Scheduled Looks](https://cloud.google.com/looker/docs/r/api/embed-permissions).
   ///
   ///
   /// #### Scheduled Plan Destination Formats
@@ -7572,10 +8406,11 @@ namespace Looker.SDK.API40
   ///
   /// <param name="scheduled_plan_id">Scheduled Plan Id</param>
   public async Task<SdkResponse<ScheduledPlan, Exception>> update_scheduled_plan(
-    long scheduled_plan_id,
+    string scheduled_plan_id,
     WriteScheduledPlan body,
     ITransportSettings? options = null)
 {  
+      scheduled_plan_id = SdkUtils.EncodeParam(scheduled_plan_id);
     return await AuthRequest<ScheduledPlan, Exception>(HttpMethod.Patch, $"/scheduled_plans/{scheduled_plan_id}", null,body,options);
   }
 
@@ -7591,9 +8426,10 @@ namespace Looker.SDK.API40
   ///
   /// <param name="scheduled_plan_id">Scheduled Plan Id</param>
   public async Task<SdkResponse<string, Exception>> delete_scheduled_plan(
-    long scheduled_plan_id,
+    string scheduled_plan_id,
     ITransportSettings? options = null)
 {  
+      scheduled_plan_id = SdkUtils.EncodeParam(scheduled_plan_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/scheduled_plans/{scheduled_plan_id}", null,null,options);
   }
 
@@ -7617,7 +8453,7 @@ namespace Looker.SDK.API40
   /// <param name="fields">Comma delimited list of field names. If provided, only the fields specified will be included in the response</param>
   /// <param name="all_users">Return scheduled plans belonging to all users (caller needs see_schedules permission)</param>
   public async Task<SdkResponse<ScheduledPlan[], Exception>> all_scheduled_plans(
-    long? user_id = null,
+    string? user_id = null,
     string? fields = null,
     bool? all_users = null,
     ITransportSettings? options = null)
@@ -7654,7 +8490,7 @@ namespace Looker.SDK.API40
   ///
   /// When `run_as_recipient` is `true` and all the email recipients are Looker user accounts, the
   /// queries are run in the context of each recipient, so different recipients may see different
-  /// data from the same scheduled render of a look or dashboard. For more details, see [Run As Recipient](https://looker.com/docs/r/admin/run-as-recipient).
+  /// data from the same scheduled render of a look or dashboard. For more details, see [Run As Recipient](https://cloud.google.com/looker/docs/r/admin/run-as-recipient).
   ///
   /// Admins can create and modify scheduled plans on behalf of other users by specifying a user id.
   /// Non-admin users may not create or modify scheduled plans by or for other users.
@@ -7662,7 +8498,7 @@ namespace Looker.SDK.API40
   /// #### Email Permissions:
   ///
   /// For details about permissions required to schedule delivery to email and the safeguards
-  /// Looker offers to protect against sending to unauthorized email destinations, see [Email Domain Whitelist for Scheduled Looks](https://docs.looker.com/r/api/embed-permissions).
+  /// Looker offers to protect against sending to unauthorized email destinations, see [Email Domain Allow List for Scheduled Looks](https://cloud.google.com/looker/docs/r/api/embed-permissions).
   ///
   ///
   /// #### Scheduled Plan Destination Formats
@@ -7711,7 +8547,7 @@ namespace Looker.SDK.API40
   /// #### Email Permissions:
   ///
   /// For details about permissions required to schedule delivery to email and the safeguards
-  /// Looker offers to protect against sending to unauthorized email destinations, see [Email Domain Whitelist for Scheduled Looks](https://docs.looker.com/r/api/embed-permissions).
+  /// Looker offers to protect against sending to unauthorized email destinations, see [Email Domain Allow List for Scheduled Looks](https://cloud.google.com/looker/docs/r/api/embed-permissions).
   ///
   ///
   /// #### Scheduled Plan Destination Formats
@@ -7747,6 +8583,76 @@ namespace Looker.SDK.API40
     return await AuthRequest<ScheduledPlan, Exception>(HttpMethod.Post, "/scheduled_plans/run_once", null,body,options);
   }
 
+  /// ### Search Scheduled Plans
+  ///
+  /// Returns all scheduled plans which matches the given search criteria.
+  ///
+  /// If no user_id is provided, this function returns the scheduled plans owned by the caller.
+  ///
+  ///
+  /// To list all schedules for all users, pass `all_users=true`.
+  ///
+  ///
+  /// The caller must have `see_schedules` permission to see other users' scheduled plans.
+  ///
+  /// GET /scheduled_plans/search -> ScheduledPlan[]
+  ///
+  /// <returns><c>ScheduledPlan[]</c> Scheduled Plan (application/json)</returns>
+  ///
+  /// <param name="user_id">Return scheduled plans belonging to this user_id. If not provided, returns scheduled plans owned by the caller.</param>
+  /// <param name="fields">Comma delimited list of field names. If provided, only the fields specified will be included in the response</param>
+  /// <param name="all_users">Return scheduled plans belonging to all users (caller needs see_schedules permission)</param>
+  /// <param name="limit">Number of results to return. (used with offset and takes priority over page and per_page)</param>
+  /// <param name="offset">Number of results to skip before returning any. (used with limit and takes priority over page and per_page)</param>
+  /// <param name="sorts">Fields to sort by.</param>
+  /// <param name="name">Match Scheduled plan's name.</param>
+  /// <param name="user_first_name">Returns scheduled plans belonging to user with this first name.</param>
+  /// <param name="user_last_name">Returns scheduled plans belonging to user with this last name.</param>
+  /// <param name="dashboard_id">Returns scheduled plans created on this Dashboard.</param>
+  /// <param name="look_id">Returns scheduled plans created on this Look.</param>
+  /// <param name="lookml_dashboard_id">Returns scheduled plans created on this LookML Dashboard.</param>
+  /// <param name="recipient">Match recipient address.</param>
+  /// <param name="destination_type">Match scheduled plan's destination type.</param>
+  /// <param name="delivery_format">Match scheduled plan's delivery format.</param>
+  /// <param name="filter_or">Combine given search criteria in a boolean OR expression</param>
+  public async Task<SdkResponse<ScheduledPlan[], Exception>> search_scheduled_plans(
+    string? user_id = null,
+    string? fields = null,
+    bool? all_users = null,
+    long? limit = null,
+    long? offset = null,
+    string? sorts = null,
+    string? name = null,
+    string? user_first_name = null,
+    string? user_last_name = null,
+    string? dashboard_id = null,
+    string? look_id = null,
+    string? lookml_dashboard_id = null,
+    string? recipient = null,
+    string? destination_type = null,
+    string? delivery_format = null,
+    bool? filter_or = null,
+    ITransportSettings? options = null)
+{  
+    return await AuthRequest<ScheduledPlan[], Exception>(HttpMethod.Get, "/scheduled_plans/search", new Values {
+      { "user_id", user_id },
+      { "fields", fields },
+      { "all_users", all_users },
+      { "limit", limit },
+      { "offset", offset },
+      { "sorts", sorts },
+      { "name", name },
+      { "user_first_name", user_first_name },
+      { "user_last_name", user_last_name },
+      { "dashboard_id", dashboard_id },
+      { "look_id", look_id },
+      { "lookml_dashboard_id", lookml_dashboard_id },
+      { "recipient", recipient },
+      { "destination_type", destination_type },
+      { "delivery_format", delivery_format },
+      { "filter_or", filter_or }},null,options);
+  }
+
   /// ### Get Scheduled Plans for a Look
   ///
   /// Returns all scheduled plans for a look which belong to the caller or given user.
@@ -7768,12 +8674,13 @@ namespace Looker.SDK.API40
   /// <param name="fields">Requested fields.</param>
   /// <param name="all_users">Return scheduled plans belonging to all users for the look</param>
   public async Task<SdkResponse<ScheduledPlan[], Exception>> scheduled_plans_for_look(
-    long look_id,
-    long? user_id = null,
+    string look_id,
+    string? user_id = null,
     string? fields = null,
     bool? all_users = null,
     ITransportSettings? options = null)
 {  
+      look_id = SdkUtils.EncodeParam(look_id);
     return await AuthRequest<ScheduledPlan[], Exception>(HttpMethod.Get, $"/scheduled_plans/look/{look_id}", new Values {
       { "user_id", user_id },
       { "fields", fields },
@@ -7801,12 +8708,13 @@ namespace Looker.SDK.API40
   /// <param name="all_users">Return scheduled plans belonging to all users for the dashboard</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<ScheduledPlan[], Exception>> scheduled_plans_for_dashboard(
-    long dashboard_id,
-    long? user_id = null,
+    string dashboard_id,
+    string? user_id = null,
     bool? all_users = null,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      dashboard_id = SdkUtils.EncodeParam(dashboard_id);
     return await AuthRequest<ScheduledPlan[], Exception>(HttpMethod.Get, $"/scheduled_plans/dashboard/{dashboard_id}", new Values {
       { "user_id", user_id },
       { "all_users", all_users },
@@ -7835,7 +8743,7 @@ namespace Looker.SDK.API40
   /// <param name="all_users">Return scheduled plans belonging to all users for the dashboard</param>
   public async Task<SdkResponse<ScheduledPlan[], Exception>> scheduled_plans_for_lookml_dashboard(
     string lookml_dashboard_id,
-    long? user_id = null,
+    string? user_id = null,
     string? fields = null,
     bool? all_users = null,
     ITransportSettings? options = null)
@@ -7866,7 +8774,7 @@ namespace Looker.SDK.API40
   /// #### Email Permissions:
   ///
   /// For details about permissions required to schedule delivery to email and the safeguards
-  /// Looker offers to protect against sending to unauthorized email destinations, see [Email Domain Whitelist for Scheduled Looks](https://docs.looker.com/r/api/embed-permissions).
+  /// Looker offers to protect against sending to unauthorized email destinations, see [Email Domain Allow List for Scheduled Looks](https://cloud.google.com/looker/docs/r/api/embed-permissions).
   ///
   ///
   /// #### Scheduled Plan Destination Formats
@@ -7901,10 +8809,11 @@ namespace Looker.SDK.API40
   ///
   /// <param name="scheduled_plan_id">Id of schedule plan to copy and run</param>
   public async Task<SdkResponse<ScheduledPlan, Exception>> scheduled_plan_run_once_by_id(
-    long scheduled_plan_id,
+    string scheduled_plan_id,
     WriteScheduledPlan? body,
     ITransportSettings? options = null)
 {  
+      scheduled_plan_id = SdkUtils.EncodeParam(scheduled_plan_id);
     return await AuthRequest<ScheduledPlan, Exception>(HttpMethod.Post, $"/scheduled_plans/{scheduled_plan_id}/run_once", null,body,options);
   }
 
@@ -7918,7 +8827,7 @@ namespace Looker.SDK.API40
   ///
   /// GET /session -> ApiSession
   ///
-  /// <returns><c>ApiSession</c> Session (application/json)</returns>
+  /// <returns><c>ApiSession</c> Auth (application/json)</returns>
   ///
   public async Task<SdkResponse<ApiSession, Exception>> session(
     ITransportSettings? options = null)
@@ -7949,7 +8858,7 @@ namespace Looker.SDK.API40
   ///
   /// PATCH /session -> ApiSession
   ///
-  /// <returns><c>ApiSession</c> Session (application/json)</returns>
+  /// <returns><c>ApiSession</c> Auth (application/json)</returns>
   ///
   public async Task<SdkResponse<ApiSession, Exception>> update_session(
     WriteApiSession body,
@@ -7960,6 +8869,75 @@ namespace Looker.SDK.API40
 
   #endregion Session: Session Information
 
+  #region SqlInterfaceQuery: Run and Manage SQL Interface Queries
+
+  /// ### Handles Avatica RPC metadata requests for SQL Interface queries
+  ///
+  /// GET /sql_interface_queries/metadata -> SqlInterfaceQueryMetadata
+  ///
+  /// <returns><c>SqlInterfaceQueryMetadata</c>  (application/json)</returns>
+  ///
+  /// <param name="avatica_request">Avatica RPC request</param>
+  public async Task<SdkResponse<SqlInterfaceQueryMetadata, Exception>> sql_interface_metadata(
+    string? avatica_request = null,
+    ITransportSettings? options = null)
+{  
+    return await AuthRequest<SqlInterfaceQueryMetadata, Exception>(HttpMethod.Get, "/sql_interface_queries/metadata", new Values {
+      { "avatica_request", avatica_request }},null,options);
+  }
+
+  /// ### Run a saved SQL interface query.
+  ///
+  /// This runs a previously created SQL interface query.
+  ///
+  /// The 'result_format' parameter specifies the desired structure and format of the response.
+  ///
+  /// Supported formats:
+  ///
+  /// | result_format | Description
+  /// | :-----------: | :--- |
+  /// | json_bi | Row data plus metadata describing the fields, pivots, table calcs, and other aspects of the query
+  ///
+  /// GET /sql_interface_queries/{query_id}/run/{result_format} -> JsonBi
+  ///
+  /// <returns>
+  /// <c>JsonBi</c> Query Result (text)
+  /// <c>JsonBi</c> Query Result (application/json)
+  /// </returns>
+  ///
+  /// <param name="query_id">Integer id of query</param>
+  /// <param name="result_format">Format of result, options are: ["json_bi"]</param>
+  public async Task<SdkResponse<TSuccess, Exception>> run_sql_interface_query<TSuccess>(
+    long query_id,
+    string result_format,
+    ITransportSettings? options = null) where TSuccess : class
+{  
+      result_format = SdkUtils.EncodeParam(result_format);
+    return await AuthRequest<TSuccess, Exception>(HttpMethod.Get, $"/sql_interface_queries/{query_id}/run/{result_format}", null,null,options);
+  }
+
+  /// ### Create a SQL interface query.
+  ///
+  /// This allows you to create a new SQL interface query that you can later run. Looker queries are immutable once created
+  /// and are not deleted. If you create a query that is exactly like an existing query then the existing query
+  /// will be returned and no new query will be created. Whether a new query is created or not, you can use
+  /// the 'id' in the returned query with the 'run' method.
+  ///
+  /// The query parameters are passed as json in the body of the request.
+  ///
+  /// POST /sql_interface_queries -> SqlInterfaceQuery
+  ///
+  /// <returns><c>SqlInterfaceQuery</c> SQL Interface Query (application/json)</returns>
+  ///
+  public async Task<SdkResponse<SqlInterfaceQuery, Exception>> create_sql_interface_query(
+    WriteSqlInterfaceQueryCreate body,
+    ITransportSettings? options = null)
+{  
+    return await AuthRequest<SqlInterfaceQuery, Exception>(HttpMethod.Post, "/sql_interface_queries", null,body,options);
+  }
+
+  #endregion SqlInterfaceQuery: Run and Manage SQL Interface Queries
+
   #region Theme: Manage Themes
 
   /// ### Get an array of all existing themes
@@ -7968,7 +8946,7 @@ namespace Looker.SDK.API40
   ///
   /// This method returns an array of all existing themes. The active time for the theme is not considered.
   ///
-  /// **Note**: Custom themes needs to be enabled by Looker. Unless custom themes are enabled, only the automatically generated default theme can be used. Please contact your Account Manager or help.looker.com to update your license for this feature.
+  /// **Note**: Custom themes needs to be enabled by Looker. Unless custom themes are enabled, only the automatically generated default theme can be used. Please contact your Account Manager or https://console.cloud.google.com/support/cases/ to update your license for this feature.
   ///
   /// GET /themes -> Theme[]
   ///
@@ -7995,9 +8973,9 @@ namespace Looker.SDK.API40
   ///
   /// **Permanently delete** an existing theme with [Delete Theme](#!/Theme/delete_theme)
   ///
-  /// For more information, see [Creating and Applying Themes](https://looker.com/docs/r/admin/themes).
+  /// For more information, see [Creating and Applying Themes](https://cloud.google.com/looker/docs/r/admin/themes).
   ///
-  /// **Note**: Custom themes needs to be enabled by Looker. Unless custom themes are enabled, only the automatically generated default theme can be used. Please contact your Account Manager or help.looker.com to update your license for this feature.
+  /// **Note**: Custom themes needs to be enabled by Looker. Unless custom themes are enabled, only the automatically generated default theme can be used. Please contact your Account Manager or https://console.cloud.google.com/support/cases/ to update your license for this feature.
   ///
   /// POST /themes -> Theme
   ///
@@ -8047,7 +9025,7 @@ namespace Looker.SDK.API40
   ///
   /// Get a **single theme** by id with [Theme](#!/Theme/theme)
   ///
-  /// **Note**: Custom themes needs to be enabled by Looker. Unless custom themes are enabled, only the automatically generated default theme can be used. Please contact your Account Manager or help.looker.com to update your license for this feature.
+  /// **Note**: Custom themes needs to be enabled by Looker. Unless custom themes are enabled, only the automatically generated default theme can be used. Please contact your Account Manager or https://console.cloud.google.com/support/cases/ to update your license for this feature.
   ///
   /// GET /themes/search -> Theme[]
   ///
@@ -8063,7 +9041,7 @@ namespace Looker.SDK.API40
   /// <param name="fields">Requested fields.</param>
   /// <param name="filter_or">Combine given search criteria in a boolean OR expression</param>
   public async Task<SdkResponse<Theme[], Exception>> search_themes(
-    long? id = null,
+    string? id = null,
     string? name = null,
     DateTime? begin_at = null,
     DateTime? end_at = null,
@@ -8117,7 +9095,7 @@ namespace Looker.SDK.API40
   ///
   /// Returns the new specified default theme object.
   ///
-  /// **Note**: Custom themes needs to be enabled by Looker. Unless custom themes are enabled, only the automatically generated default theme can be used. Please contact your Account Manager or help.looker.com to update your license for this feature.
+  /// **Note**: Custom themes needs to be enabled by Looker. Unless custom themes are enabled, only the automatically generated default theme can be used. Please contact your Account Manager or https://console.cloud.google.com/support/cases/ to update your license for this feature.
   ///
   /// PUT /themes/default -> Theme
   ///
@@ -8140,7 +9118,7 @@ namespace Looker.SDK.API40
   ///
   /// The optional `ts` parameter can specify a different timestamp than "now."
   ///
-  /// **Note**: Custom themes needs to be enabled by Looker. Unless custom themes are enabled, only the automatically generated default theme can be used. Please contact your Account Manager or help.looker.com to update your license for this feature.
+  /// **Note**: Custom themes needs to be enabled by Looker. Unless custom themes are enabled, only the automatically generated default theme can be used. Please contact your Account Manager or https://console.cloud.google.com/support/cases/ to update your license for this feature.
   ///
   /// GET /themes/active -> Theme[]
   ///
@@ -8166,7 +9144,7 @@ namespace Looker.SDK.API40
   /// The optional `ts` parameter can specify a different timestamp than "now."
   /// Note: API users with `show` ability can call this function
   ///
-  /// **Note**: Custom themes needs to be enabled by Looker. Unless custom themes are enabled, only the automatically generated default theme can be used. Please contact your Account Manager or help.looker.com to update your license for this feature.
+  /// **Note**: Custom themes needs to be enabled by Looker. Unless custom themes are enabled, only the automatically generated default theme can be used. Please contact your Account Manager or https://console.cloud.google.com/support/cases/ to update your license for this feature.
   ///
   /// GET /themes/theme_or_default -> Theme
   ///
@@ -8190,7 +9168,7 @@ namespace Looker.SDK.API40
   ///
   /// See [Create Theme](#!/Theme/create_theme) for constraints
   ///
-  /// **Note**: Custom themes needs to be enabled by Looker. Unless custom themes are enabled, only the automatically generated default theme can be used. Please contact your Account Manager or help.looker.com to update your license for this feature.
+  /// **Note**: Custom themes needs to be enabled by Looker. Unless custom themes are enabled, only the automatically generated default theme can be used. Please contact your Account Manager or https://console.cloud.google.com/support/cases/ to update your license for this feature.
   ///
   /// POST /themes/validate -> ValidationError
   ///
@@ -8210,7 +9188,7 @@ namespace Looker.SDK.API40
   ///
   /// Use this to retrieve a specific theme, whether or not it's currently active.
   ///
-  /// **Note**: Custom themes needs to be enabled by Looker. Unless custom themes are enabled, only the automatically generated default theme can be used. Please contact your Account Manager or help.looker.com to update your license for this feature.
+  /// **Note**: Custom themes needs to be enabled by Looker. Unless custom themes are enabled, only the automatically generated default theme can be used. Please contact your Account Manager or https://console.cloud.google.com/support/cases/ to update your license for this feature.
   ///
   /// GET /themes/{theme_id} -> Theme
   ///
@@ -8219,17 +9197,18 @@ namespace Looker.SDK.API40
   /// <param name="theme_id">Id of theme</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<Theme, Exception>> theme(
-    long theme_id,
+    string theme_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      theme_id = SdkUtils.EncodeParam(theme_id);
     return await AuthRequest<Theme, Exception>(HttpMethod.Get, $"/themes/{theme_id}", new Values {
       { "fields", fields }},null,options);
   }
 
   /// ### Update the theme by id.
   ///
-  /// **Note**: Custom themes needs to be enabled by Looker. Unless custom themes are enabled, only the automatically generated default theme can be used. Please contact your Account Manager or help.looker.com to update your license for this feature.
+  /// **Note**: Custom themes needs to be enabled by Looker. Unless custom themes are enabled, only the automatically generated default theme can be used. Please contact your Account Manager or https://console.cloud.google.com/support/cases/ to update your license for this feature.
   ///
   /// PATCH /themes/{theme_id} -> Theme
   ///
@@ -8237,10 +9216,11 @@ namespace Looker.SDK.API40
   ///
   /// <param name="theme_id">Id of theme</param>
   public async Task<SdkResponse<Theme, Exception>> update_theme(
-    long theme_id,
+    string theme_id,
     WriteTheme body,
     ITransportSettings? options = null)
 {  
+      theme_id = SdkUtils.EncodeParam(theme_id);
     return await AuthRequest<Theme, Exception>(HttpMethod.Patch, $"/themes/{theme_id}", null,body,options);
   }
 
@@ -8252,7 +9232,7 @@ namespace Looker.SDK.API40
   ///
   /// All IDs associated with a theme name can be retrieved by searching for the theme name with [Theme Search](#!/Theme/search).
   ///
-  /// **Note**: Custom themes needs to be enabled by Looker. Unless custom themes are enabled, only the automatically generated default theme can be used. Please contact your Account Manager or help.looker.com to update your license for this feature.
+  /// **Note**: Custom themes needs to be enabled by Looker. Unless custom themes are enabled, only the automatically generated default theme can be used. Please contact your Account Manager or https://console.cloud.google.com/support/cases/ to update your license for this feature.
   ///
   /// DELETE /themes/{theme_id} -> string
   ///
@@ -8296,6 +9276,9 @@ namespace Looker.SDK.API40
   ///
   /// Boolean search params accept only "true" and "false" as values.
   ///
+  ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// GET /credentials_email/search -> CredentialsEmailSearch[]
   ///
   /// <returns><c>CredentialsEmailSearch[]</c> Credentials Email (application/json)</returns>
@@ -8313,7 +9296,7 @@ namespace Looker.SDK.API40
     long? limit = null,
     long? offset = null,
     string? sorts = null,
-    long? id = null,
+    string? id = null,
     string? email = null,
     string? emails = null,
     bool? filter_or = null,
@@ -8365,7 +9348,7 @@ namespace Looker.SDK.API40
     long? limit = null,
     long? offset = null,
     string? sorts = null,
-    DelimArray<long>? ids = null,
+    DelimArray<string>? ids = null,
     ITransportSettings? options = null)
 {  
     return await AuthRequest<User[], Exception>(HttpMethod.Get, "/users", new Values {
@@ -8515,7 +9498,7 @@ namespace Looker.SDK.API40
     long? limit = null,
     long? offset = null,
     string? sorts = null,
-    long? id = null,
+    string? id = null,
     string? first_name = null,
     string? last_name = null,
     bool? verified_looker_employee = null,
@@ -8552,10 +9535,11 @@ namespace Looker.SDK.API40
   /// <param name="user_id">Id of user</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<User, Exception>> user(
-    long user_id,
+    string user_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<User, Exception>(HttpMethod.Get, $"/users/{user_id}", new Values {
       { "fields", fields }},null,options);
   }
@@ -8569,11 +9553,12 @@ namespace Looker.SDK.API40
   /// <param name="user_id">Id of user</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<User, Exception>> update_user(
-    long user_id,
+    string user_id,
     WriteUser body,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<User, Exception>(HttpMethod.Patch, $"/users/{user_id}", new Values {
       { "fields", fields }},body,options);
   }
@@ -8588,9 +9573,10 @@ namespace Looker.SDK.API40
   ///
   /// <param name="user_id">Id of user</param>
   public async Task<SdkResponse<string, Exception>> delete_user(
-    long user_id,
+    string user_id,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/users/{user_id}", null,null,options);
   }
 
@@ -8623,6 +9609,8 @@ namespace Looker.SDK.API40
   ///
   /// **NOTE**: The 'api' credential type was only used with the legacy Looker query API and is no longer supported. The credential type for API you are currently looking at is 'api3'.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// GET /users/credential/{credential_type}/{credential_id} -> User
   ///
   /// <returns><c>User</c> Specified user. (application/json)</returns>
@@ -8644,314 +9632,375 @@ namespace Looker.SDK.API40
 
   /// ### Email/password login information for the specified user.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// GET /users/{user_id}/credentials_email -> CredentialsEmail
   ///
   /// <returns><c>CredentialsEmail</c> Email/Password Credential (application/json)</returns>
   ///
-  /// <param name="user_id">id of user</param>
+  /// <param name="user_id">Id of user</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<CredentialsEmail, Exception>> user_credentials_email(
-    long user_id,
+    string user_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<CredentialsEmail, Exception>(HttpMethod.Get, $"/users/{user_id}/credentials_email", new Values {
       { "fields", fields }},null,options);
   }
 
   /// ### Email/password login information for the specified user.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// POST /users/{user_id}/credentials_email -> CredentialsEmail
   ///
   /// <returns><c>CredentialsEmail</c> Email/Password Credential (application/json)</returns>
   ///
-  /// <param name="user_id">id of user</param>
+  /// <param name="user_id">Id of user</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<CredentialsEmail, Exception>> create_user_credentials_email(
-    long user_id,
+    string user_id,
     WriteCredentialsEmail body,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<CredentialsEmail, Exception>(HttpMethod.Post, $"/users/{user_id}/credentials_email", new Values {
       { "fields", fields }},body,options);
   }
 
   /// ### Email/password login information for the specified user.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// PATCH /users/{user_id}/credentials_email -> CredentialsEmail
   ///
   /// <returns><c>CredentialsEmail</c> Email/Password Credential (application/json)</returns>
   ///
-  /// <param name="user_id">id of user</param>
+  /// <param name="user_id">Id of user</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<CredentialsEmail, Exception>> update_user_credentials_email(
-    long user_id,
+    string user_id,
     WriteCredentialsEmail body,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<CredentialsEmail, Exception>(HttpMethod.Patch, $"/users/{user_id}/credentials_email", new Values {
       { "fields", fields }},body,options);
   }
 
   /// ### Email/password login information for the specified user.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// DELETE /users/{user_id}/credentials_email -> string
   ///
   /// <returns><c>string</c> Successfully deleted. (application/json)</returns>
   ///
-  /// <param name="user_id">id of user</param>
+  /// <param name="user_id">Id of user</param>
   public async Task<SdkResponse<string, Exception>> delete_user_credentials_email(
-    long user_id,
+    string user_id,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/users/{user_id}/credentials_email", null,null,options);
   }
 
   /// ### Two-factor login information for the specified user.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// GET /users/{user_id}/credentials_totp -> CredentialsTotp
   ///
   /// <returns><c>CredentialsTotp</c> Two-Factor Credential (application/json)</returns>
   ///
-  /// <param name="user_id">id of user</param>
+  /// <param name="user_id">Id of user</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<CredentialsTotp, Exception>> user_credentials_totp(
-    long user_id,
+    string user_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<CredentialsTotp, Exception>(HttpMethod.Get, $"/users/{user_id}/credentials_totp", new Values {
       { "fields", fields }},null,options);
   }
 
   /// ### Two-factor login information for the specified user.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// POST /users/{user_id}/credentials_totp -> CredentialsTotp
   ///
   /// <returns><c>CredentialsTotp</c> Two-Factor Credential (application/json)</returns>
   ///
-  /// <param name="user_id">id of user</param>
+  /// <param name="user_id">Id of user</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<CredentialsTotp, Exception>> create_user_credentials_totp(
-    long user_id,
+    string user_id,
     CredentialsTotp? body,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<CredentialsTotp, Exception>(HttpMethod.Post, $"/users/{user_id}/credentials_totp", new Values {
       { "fields", fields }},body,options);
   }
 
   /// ### Two-factor login information for the specified user.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// DELETE /users/{user_id}/credentials_totp -> string
   ///
   /// <returns><c>string</c> Successfully deleted. (application/json)</returns>
   ///
-  /// <param name="user_id">id of user</param>
+  /// <param name="user_id">Id of user</param>
   public async Task<SdkResponse<string, Exception>> delete_user_credentials_totp(
-    long user_id,
+    string user_id,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/users/{user_id}/credentials_totp", null,null,options);
   }
 
   /// ### LDAP login information for the specified user.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// GET /users/{user_id}/credentials_ldap -> CredentialsLDAP
   ///
   /// <returns><c>CredentialsLDAP</c> LDAP Credential (application/json)</returns>
   ///
-  /// <param name="user_id">id of user</param>
+  /// <param name="user_id">Id of user</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<CredentialsLDAP, Exception>> user_credentials_ldap(
-    long user_id,
+    string user_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<CredentialsLDAP, Exception>(HttpMethod.Get, $"/users/{user_id}/credentials_ldap", new Values {
       { "fields", fields }},null,options);
   }
 
   /// ### LDAP login information for the specified user.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// DELETE /users/{user_id}/credentials_ldap -> string
   ///
   /// <returns><c>string</c> Successfully deleted. (application/json)</returns>
   ///
-  /// <param name="user_id">id of user</param>
+  /// <param name="user_id">Id of user</param>
   public async Task<SdkResponse<string, Exception>> delete_user_credentials_ldap(
-    long user_id,
+    string user_id,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/users/{user_id}/credentials_ldap", null,null,options);
   }
 
   /// ### Google authentication login information for the specified user.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// GET /users/{user_id}/credentials_google -> CredentialsGoogle
   ///
   /// <returns><c>CredentialsGoogle</c> Google Auth Credential (application/json)</returns>
   ///
-  /// <param name="user_id">id of user</param>
+  /// <param name="user_id">Id of user</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<CredentialsGoogle, Exception>> user_credentials_google(
-    long user_id,
+    string user_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<CredentialsGoogle, Exception>(HttpMethod.Get, $"/users/{user_id}/credentials_google", new Values {
       { "fields", fields }},null,options);
   }
 
   /// ### Google authentication login information for the specified user.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// DELETE /users/{user_id}/credentials_google -> string
   ///
   /// <returns><c>string</c> Successfully deleted. (application/json)</returns>
   ///
-  /// <param name="user_id">id of user</param>
+  /// <param name="user_id">Id of user</param>
   public async Task<SdkResponse<string, Exception>> delete_user_credentials_google(
-    long user_id,
+    string user_id,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/users/{user_id}/credentials_google", null,null,options);
   }
 
   /// ### Saml authentication login information for the specified user.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// GET /users/{user_id}/credentials_saml -> CredentialsSaml
   ///
   /// <returns><c>CredentialsSaml</c> Saml Auth Credential (application/json)</returns>
   ///
-  /// <param name="user_id">id of user</param>
+  /// <param name="user_id">Id of user</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<CredentialsSaml, Exception>> user_credentials_saml(
-    long user_id,
+    string user_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<CredentialsSaml, Exception>(HttpMethod.Get, $"/users/{user_id}/credentials_saml", new Values {
       { "fields", fields }},null,options);
   }
 
   /// ### Saml authentication login information for the specified user.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// DELETE /users/{user_id}/credentials_saml -> string
   ///
   /// <returns><c>string</c> Successfully deleted. (application/json)</returns>
   ///
-  /// <param name="user_id">id of user</param>
+  /// <param name="user_id">Id of user</param>
   public async Task<SdkResponse<string, Exception>> delete_user_credentials_saml(
-    long user_id,
+    string user_id,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/users/{user_id}/credentials_saml", null,null,options);
   }
 
   /// ### OpenID Connect (OIDC) authentication login information for the specified user.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// GET /users/{user_id}/credentials_oidc -> CredentialsOIDC
   ///
   /// <returns><c>CredentialsOIDC</c> OIDC Auth Credential (application/json)</returns>
   ///
-  /// <param name="user_id">id of user</param>
+  /// <param name="user_id">Id of user</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<CredentialsOIDC, Exception>> user_credentials_oidc(
-    long user_id,
+    string user_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<CredentialsOIDC, Exception>(HttpMethod.Get, $"/users/{user_id}/credentials_oidc", new Values {
       { "fields", fields }},null,options);
   }
 
   /// ### OpenID Connect (OIDC) authentication login information for the specified user.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// DELETE /users/{user_id}/credentials_oidc -> string
   ///
   /// <returns><c>string</c> Successfully deleted. (application/json)</returns>
   ///
-  /// <param name="user_id">id of user</param>
+  /// <param name="user_id">Id of user</param>
   public async Task<SdkResponse<string, Exception>> delete_user_credentials_oidc(
-    long user_id,
+    string user_id,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/users/{user_id}/credentials_oidc", null,null,options);
   }
 
-  /// ### API 3 login information for the specified user. This is for the newer API keys that can be added for any user.
+  /// ### API login information for the specified user. This is for the newer API keys that can be added for any user.
+  ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
   ///
   /// GET /users/{user_id}/credentials_api3/{credentials_api3_id} -> CredentialsApi3
   ///
-  /// <returns><c>CredentialsApi3</c> API 3 Credential (application/json)</returns>
+  /// <returns><c>CredentialsApi3</c> API Credential (application/json)</returns>
   ///
   /// <param name="user_id">Id of user</param>
-  /// <param name="credentials_api3_id">Id of API 3 Credential</param>
+  /// <param name="credentials_api3_id">Id of API Credential</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<CredentialsApi3, Exception>> user_credentials_api3(
-    long user_id,
-    long credentials_api3_id,
+    string user_id,
+    string credentials_api3_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
+      credentials_api3_id = SdkUtils.EncodeParam(credentials_api3_id);
     return await AuthRequest<CredentialsApi3, Exception>(HttpMethod.Get, $"/users/{user_id}/credentials_api3/{credentials_api3_id}", new Values {
       { "fields", fields }},null,options);
   }
 
-  /// ### API 3 login information for the specified user. This is for the newer API keys that can be added for any user.
+  /// ### API login information for the specified user. This is for the newer API keys that can be added for any user.
+  ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
   ///
   /// DELETE /users/{user_id}/credentials_api3/{credentials_api3_id} -> string
   ///
   /// <returns><c>string</c> Successfully deleted. (application/json)</returns>
   ///
-  /// <param name="user_id">id of user</param>
-  /// <param name="credentials_api3_id">id of API 3 Credential</param>
+  /// <param name="user_id">Id of user</param>
+  /// <param name="credentials_api3_id">Id of API Credential</param>
   public async Task<SdkResponse<string, Exception>> delete_user_credentials_api3(
-    long user_id,
-    long credentials_api3_id,
+    string user_id,
+    string credentials_api3_id,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
+      credentials_api3_id = SdkUtils.EncodeParam(credentials_api3_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/users/{user_id}/credentials_api3/{credentials_api3_id}", null,null,options);
   }
 
-  /// ### API 3 login information for the specified user. This is for the newer API keys that can be added for any user.
+  /// ### API login information for the specified user. This is for the newer API keys that can be added for any user.
+  ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
   ///
   /// GET /users/{user_id}/credentials_api3 -> CredentialsApi3[]
   ///
-  /// <returns><c>CredentialsApi3[]</c> API 3 Credential (application/json)</returns>
+  /// <returns><c>CredentialsApi3[]</c> API Credential (application/json)</returns>
   ///
-  /// <param name="user_id">id of user</param>
+  /// <param name="user_id">Id of user</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<CredentialsApi3[], Exception>> all_user_credentials_api3s(
-    long user_id,
+    string user_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<CredentialsApi3[], Exception>(HttpMethod.Get, $"/users/{user_id}/credentials_api3", new Values {
       { "fields", fields }},null,options);
   }
 
-  /// ### API 3 login information for the specified user. This is for the newer API keys that can be added for any user.
+  /// ### API login information for the specified user. This is for the newer API keys that can be added for any user.
+  ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
   ///
   /// POST /users/{user_id}/credentials_api3 -> CreateCredentialsApi3
   ///
-  /// <returns><c>CreateCredentialsApi3</c> API 3 Credential (application/json)</returns>
+  /// <returns><c>CreateCredentialsApi3</c> API Credential (application/json)</returns>
   ///
-  /// <param name="user_id">id of user</param>
+  /// <param name="user_id">Id of user</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<CreateCredentialsApi3, Exception>> create_user_credentials_api3(
-    long user_id,
+    string user_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<CreateCredentialsApi3, Exception>(HttpMethod.Post, $"/users/{user_id}/credentials_api3", new Values {
       { "fields", fields }},null,options);
   }
 
   /// ### Embed login information for the specified user.
+  ///
+  /// Calls to this endpoint require [Embedding](https://cloud.google.com/looker/docs/r/looker-core-feature-embed) to be enabled
   ///
   /// GET /users/{user_id}/credentials_embed/{credentials_embed_id} -> CredentialsEmbed
   ///
@@ -8961,80 +10010,97 @@ namespace Looker.SDK.API40
   /// <param name="credentials_embed_id">Id of Embedding Credential</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<CredentialsEmbed, Exception>> user_credentials_embed(
-    long user_id,
-    long credentials_embed_id,
+    string user_id,
+    string credentials_embed_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
+      credentials_embed_id = SdkUtils.EncodeParam(credentials_embed_id);
     return await AuthRequest<CredentialsEmbed, Exception>(HttpMethod.Get, $"/users/{user_id}/credentials_embed/{credentials_embed_id}", new Values {
       { "fields", fields }},null,options);
   }
 
   /// ### Embed login information for the specified user.
   ///
+  /// Calls to this endpoint require [Embedding](https://cloud.google.com/looker/docs/r/looker-core-feature-embed) to be enabled
+  ///
   /// DELETE /users/{user_id}/credentials_embed/{credentials_embed_id} -> string
   ///
   /// <returns><c>string</c> Successfully deleted. (application/json)</returns>
   ///
-  /// <param name="user_id">id of user</param>
-  /// <param name="credentials_embed_id">id of Embedding Credential</param>
+  /// <param name="user_id">Id of user</param>
+  /// <param name="credentials_embed_id">Id of Embedding Credential</param>
   public async Task<SdkResponse<string, Exception>> delete_user_credentials_embed(
-    long user_id,
-    long credentials_embed_id,
+    string user_id,
+    string credentials_embed_id,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
+      credentials_embed_id = SdkUtils.EncodeParam(credentials_embed_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/users/{user_id}/credentials_embed/{credentials_embed_id}", null,null,options);
   }
 
   /// ### Embed login information for the specified user.
   ///
+  /// Calls to this endpoint require [Embedding](https://cloud.google.com/looker/docs/r/looker-core-feature-embed) to be enabled
+  ///
   /// GET /users/{user_id}/credentials_embed -> CredentialsEmbed[]
   ///
   /// <returns><c>CredentialsEmbed[]</c> Embedding Credential (application/json)</returns>
   ///
-  /// <param name="user_id">id of user</param>
+  /// <param name="user_id">Id of user</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<CredentialsEmbed[], Exception>> all_user_credentials_embeds(
-    long user_id,
+    string user_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<CredentialsEmbed[], Exception>(HttpMethod.Get, $"/users/{user_id}/credentials_embed", new Values {
       { "fields", fields }},null,options);
   }
 
   /// ### Looker Openid login information for the specified user. Used by Looker Analysts.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// GET /users/{user_id}/credentials_looker_openid -> CredentialsLookerOpenid
   ///
   /// <returns><c>CredentialsLookerOpenid</c> Looker OpenId Credential (application/json)</returns>
   ///
-  /// <param name="user_id">id of user</param>
+  /// <param name="user_id">Id of user</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<CredentialsLookerOpenid, Exception>> user_credentials_looker_openid(
-    long user_id,
+    string user_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<CredentialsLookerOpenid, Exception>(HttpMethod.Get, $"/users/{user_id}/credentials_looker_openid", new Values {
       { "fields", fields }},null,options);
   }
 
   /// ### Looker Openid login information for the specified user. Used by Looker Analysts.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// DELETE /users/{user_id}/credentials_looker_openid -> string
   ///
   /// <returns><c>string</c> Successfully deleted. (application/json)</returns>
   ///
-  /// <param name="user_id">id of user</param>
+  /// <param name="user_id">Id of user</param>
   public async Task<SdkResponse<string, Exception>> delete_user_credentials_looker_openid(
-    long user_id,
+    string user_id,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/users/{user_id}/credentials_looker_openid", null,null,options);
   }
 
   /// ### Web login session for the specified user.
+  ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
   ///
   /// GET /users/{user_id}/sessions/{session_id} -> Session
   ///
@@ -9044,44 +10110,53 @@ namespace Looker.SDK.API40
   /// <param name="session_id">Id of Web Login Session</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<Session, Exception>> user_session(
-    long user_id,
-    long session_id,
+    string user_id,
+    string session_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
+      session_id = SdkUtils.EncodeParam(session_id);
     return await AuthRequest<Session, Exception>(HttpMethod.Get, $"/users/{user_id}/sessions/{session_id}", new Values {
       { "fields", fields }},null,options);
   }
 
   /// ### Web login session for the specified user.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// DELETE /users/{user_id}/sessions/{session_id} -> string
   ///
   /// <returns><c>string</c> Successfully deleted. (application/json)</returns>
   ///
-  /// <param name="user_id">id of user</param>
-  /// <param name="session_id">id of Web Login Session</param>
+  /// <param name="user_id">Id of user</param>
+  /// <param name="session_id">Id of Web Login Session</param>
   public async Task<SdkResponse<string, Exception>> delete_user_session(
-    long user_id,
-    long session_id,
+    string user_id,
+    string session_id,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
+      session_id = SdkUtils.EncodeParam(session_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/users/{user_id}/sessions/{session_id}", null,null,options);
   }
 
   /// ### Web login session for the specified user.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// GET /users/{user_id}/sessions -> Session[]
   ///
   /// <returns><c>Session[]</c> Web Login Session (application/json)</returns>
   ///
-  /// <param name="user_id">id of user</param>
+  /// <param name="user_id">Id of user</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<Session[], Exception>> all_user_sessions(
-    long user_id,
+    string user_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<Session[], Exception>(HttpMethod.Get, $"/users/{user_id}/sessions", new Values {
       { "fields", fields }},null,options);
   }
@@ -9096,6 +10171,8 @@ namespace Looker.SDK.API40
   /// The expire period is always 60 minutes when expires is enabled.
   /// This method can be called with an empty body.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// POST /users/{user_id}/credentials_email/password_reset -> CredentialsEmail
   ///
   /// <returns><c>CredentialsEmail</c> email/password credential (application/json)</returns>
@@ -9104,11 +10181,12 @@ namespace Looker.SDK.API40
   /// <param name="expires">Expiring token.</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<CredentialsEmail, Exception>> create_user_credentials_email_password_reset(
-    long user_id,
+    string user_id,
     bool? expires = null,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<CredentialsEmail, Exception>(HttpMethod.Post, $"/users/{user_id}/credentials_email/password_reset", new Values {
       { "expires", expires },
       { "fields", fields }},null,options);
@@ -9120,15 +10198,16 @@ namespace Looker.SDK.API40
   ///
   /// <returns><c>Role[]</c> Roles of user. (application/json)</returns>
   ///
-  /// <param name="user_id">id of user</param>
+  /// <param name="user_id">Id of user</param>
   /// <param name="fields">Requested fields.</param>
   /// <param name="direct_association_only">Get only roles associated directly with the user: exclude those only associated through groups.</param>
   public async Task<SdkResponse<Role[], Exception>> user_roles(
-    long user_id,
+    string user_id,
     string? fields = null,
     bool? direct_association_only = null,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<Role[], Exception>(HttpMethod.Get, $"/users/{user_id}/roles", new Values {
       { "fields", fields },
       { "direct_association_only", direct_association_only }},null,options);
@@ -9140,14 +10219,15 @@ namespace Looker.SDK.API40
   ///
   /// <returns><c>Role[]</c> Roles of user. (application/json)</returns>
   ///
-  /// <param name="user_id">id of user</param>
+  /// <param name="user_id">Id of user</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<Role[], Exception>> set_user_roles(
-    long user_id,
-    long[] body,
+    string user_id,
+    string[] body,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<Role[], Exception>(HttpMethod.Put, $"/users/{user_id}/roles", new Values {
       { "fields", fields }},body,options);
   }
@@ -9179,13 +10259,14 @@ namespace Looker.SDK.API40
   /// <param name="all_values">If true, returns all values in the search path instead of just the first value found. Useful for debugging group precedence.</param>
   /// <param name="include_unset">If true, returns an empty record for each requested attribute that has no user, group, or default value.</param>
   public async Task<SdkResponse<UserAttributeWithValue[], Exception>> user_attribute_user_values(
-    long user_id,
+    string user_id,
     string? fields = null,
-    DelimArray<long>? user_attribute_ids = null,
+    DelimArray<string>? user_attribute_ids = null,
     bool? all_values = null,
     bool? include_unset = null,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<UserAttributeWithValue[], Exception>(HttpMethod.Get, $"/users/{user_id}/attribute_values", new Values {
       { "fields", fields },
       { "user_attribute_ids", user_attribute_ids },
@@ -9204,11 +10285,13 @@ namespace Looker.SDK.API40
   /// <param name="user_id">Id of user</param>
   /// <param name="user_attribute_id">Id of user attribute</param>
   public async Task<SdkResponse<UserAttributeWithValue, Exception>> set_user_attribute_user_value(
-    long user_id,
-    long user_attribute_id,
+    string user_id,
+    string user_attribute_id,
     WriteUserAttributeWithValue body,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
+      user_attribute_id = SdkUtils.EncodeParam(user_attribute_id);
     return await AuthRequest<UserAttributeWithValue, Exception>(HttpMethod.Patch, $"/users/{user_id}/attribute_values/{user_attribute_id}", null,body,options);
   }
 
@@ -9226,10 +10309,12 @@ namespace Looker.SDK.API40
   /// <param name="user_id">Id of user</param>
   /// <param name="user_attribute_id">Id of user attribute</param>
   public async Task<SdkResponse<string, Exception>> delete_user_attribute_user_value(
-    long user_id,
-    long user_attribute_id,
+    string user_id,
+    string user_attribute_id,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
+      user_attribute_id = SdkUtils.EncodeParam(user_attribute_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/users/{user_id}/attribute_values/{user_attribute_id}", null,null,options);
   }
 
@@ -9241,6 +10326,8 @@ namespace Looker.SDK.API40
   /// Password reset URLs will expire in 60 minutes.
   /// This method can be called with an empty body.
   ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
+  ///
   /// POST /users/{user_id}/credentials_email/send_password_reset -> CredentialsEmail
   ///
   /// <returns><c>CredentialsEmail</c> email/password credential (application/json)</returns>
@@ -9248,10 +10335,11 @@ namespace Looker.SDK.API40
   /// <param name="user_id">Id of user</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<CredentialsEmail, Exception>> send_user_credentials_email_password_reset(
-    long user_id,
+    string user_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<CredentialsEmail, Exception>(HttpMethod.Post, $"/users/{user_id}/credentials_email/send_password_reset", new Values {
       { "fields", fields }},null,options);
   }
@@ -9262,6 +10350,9 @@ namespace Looker.SDK.API40
   /// associated credentials.  Will overwrite all associated email addresses with
   /// the value supplied in the 'email' body param.
   /// The user's 'is_disabled' status must be true.
+  /// If the user has a credential email, they will receive a verification email and the user will be disabled until they verify the email
+  ///
+  /// Calls to this endpoint may be denied by [Looker (Google Cloud core)](https://cloud.google.com/looker/docs/r/looker-core/overview).
   ///
   /// POST /users/{user_id}/update_emails -> User
   ///
@@ -9270,16 +10361,19 @@ namespace Looker.SDK.API40
   /// <param name="user_id">Id of user</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<User, Exception>> wipeout_user_emails(
-    long user_id,
+    string user_id,
     UserEmailOnly body,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      user_id = SdkUtils.EncodeParam(user_id);
     return await AuthRequest<User, Exception>(HttpMethod.Post, $"/users/{user_id}/update_emails", new Values {
       { "fields", fields }},body,options);
   }
 
   /// Create an embed user from an external user ID
+  ///
+  /// Calls to this endpoint require [Embedding](https://cloud.google.com/looker/docs/r/looker-core-feature-embed) to be enabled
   ///
   /// POST /users/embed_user -> UserPublic
   ///
@@ -9348,10 +10442,11 @@ namespace Looker.SDK.API40
   /// <param name="user_attribute_id">Id of user attribute</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<UserAttribute, Exception>> user_attribute(
-    long user_attribute_id,
+    string user_attribute_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      user_attribute_id = SdkUtils.EncodeParam(user_attribute_id);
     return await AuthRequest<UserAttribute, Exception>(HttpMethod.Get, $"/user_attributes/{user_attribute_id}", new Values {
       { "fields", fields }},null,options);
   }
@@ -9365,11 +10460,12 @@ namespace Looker.SDK.API40
   /// <param name="user_attribute_id">Id of user attribute</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<UserAttribute, Exception>> update_user_attribute(
-    long user_attribute_id,
+    string user_attribute_id,
     WriteUserAttribute body,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      user_attribute_id = SdkUtils.EncodeParam(user_attribute_id);
     return await AuthRequest<UserAttribute, Exception>(HttpMethod.Patch, $"/user_attributes/{user_attribute_id}", new Values {
       { "fields", fields }},body,options);
   }
@@ -9380,11 +10476,12 @@ namespace Looker.SDK.API40
   ///
   /// <returns><c>string</c> Successfully deleted. (application/json)</returns>
   ///
-  /// <param name="user_attribute_id">Id of user_attribute</param>
+  /// <param name="user_attribute_id">Id of user attribute</param>
   public async Task<SdkResponse<string, Exception>> delete_user_attribute(
-    long user_attribute_id,
+    string user_attribute_id,
     ITransportSettings? options = null)
 {  
+      user_attribute_id = SdkUtils.EncodeParam(user_attribute_id);
     return await AuthRequest<string, Exception>(HttpMethod.Delete, $"/user_attributes/{user_attribute_id}", null,null,options);
   }
 
@@ -9403,10 +10500,11 @@ namespace Looker.SDK.API40
   /// <param name="user_attribute_id">Id of user attribute</param>
   /// <param name="fields">Requested fields.</param>
   public async Task<SdkResponse<UserAttributeGroupValue[], Exception>> all_user_attribute_group_values(
-    long user_attribute_id,
+    string user_attribute_id,
     string? fields = null,
     ITransportSettings? options = null)
 {  
+      user_attribute_id = SdkUtils.EncodeParam(user_attribute_id);
     return await AuthRequest<UserAttributeGroupValue[], Exception>(HttpMethod.Get, $"/user_attributes/{user_attribute_id}/group_values", new Values {
       { "fields", fields }},null,options);
   }
@@ -9438,10 +10536,11 @@ namespace Looker.SDK.API40
   ///
   /// <param name="user_attribute_id">Id of user attribute</param>
   public async Task<SdkResponse<UserAttributeGroupValue[], Exception>> set_user_attribute_group_values(
-    long user_attribute_id,
+    string user_attribute_id,
     UserAttributeGroupValue[] body,
     ITransportSettings? options = null)
 {  
+      user_attribute_id = SdkUtils.EncodeParam(user_attribute_id);
     return await AuthRequest<UserAttributeGroupValue[], Exception>(HttpMethod.Post, $"/user_attributes/{user_attribute_id}/group_values", null,body,options);
   }
 
@@ -9486,7 +10585,7 @@ namespace Looker.SDK.API40
   ///
   /// The dev workspace is NOT unique to an API session. Two applications accessing the Looker API using
   /// the same user account will see the same files in the dev workspace. To avoid collisions between
-  /// API clients it's best to have each client login with API3 credentials for a different user account.
+  /// API clients it's best to have each client login with API credentials for a different user account.
   ///
   /// Changes made to files in a dev workspace are persistent across API sessions. It's a good
   /// idea to commit any changes you've made to the git repository, but not strictly required. Your modified files

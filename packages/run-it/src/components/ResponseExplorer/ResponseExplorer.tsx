@@ -24,34 +24,37 @@
 
  */
 
-import type { FC } from 'react'
-import React from 'react'
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import {
+  IconButton,
+  Span,
   Table,
   TableBody,
-  TableRow,
   TableDataCell,
-  Span,
   TableHead,
   TableHeaderCell,
-} from '@looker/components'
-import styled from 'styled-components'
-import type { IRawResponse } from '@looker/sdk-rtl'
-import { ShowResponse } from '../ShowResponse'
-import { CollapserCard } from '../Collapser'
-import { DarkSpan, RunItHeading } from '../common'
+  TableRow,
+} from '@looker/components';
+import styled from 'styled-components';
+import type { IRawResponse, LookerSDKError } from '@looker/sdk-rtl';
+import { Warning } from '@styled-icons/material/Warning';
+import { APIErrorDialog, APIErrorDisplay } from '@looker/extension-utils';
+import { ShowResponse } from '../ShowResponse';
+import { CollapserCard } from '../Collapser';
+import { DarkSpan, RunItHeading } from '../common';
 
-type HeaderTable = string[][]
-export type ResponseContent = IRawResponse | undefined
+type HeaderTable = string[][];
+export type ResponseContent = IRawResponse | undefined;
 
 const getHeaders = (response: ResponseContent): HeaderTable => {
-  if (!response?.headers) return []
-  const result: HeaderTable = []
+  if (!response?.headers) return [];
+  const result: HeaderTable = [];
   Object.entries(response.headers).forEach(([key, val]) =>
     result.push([key, val])
-  )
-  return result
-}
+  );
+  return result;
+};
 
 const getBodySize = (response: ResponseContent): string => {
   const size =
@@ -59,20 +62,20 @@ const getBodySize = (response: ResponseContent): string => {
       ? 0
       : response?.body instanceof Blob
       ? response?.body.size
-      : response?.body.toString().length
+      : response?.body.toString().length;
 
-  return `${size} bytes`
-}
+  return `${size} bytes`;
+};
 
 const NoWrap = styled(Span)`
   display: inline-block;
   direction: rtl;
   white-space: nowrap;
   overflow: hidden;
-`
+`;
 
 interface ShowHeadersProps {
-  response: ResponseContent
+  response: ResponseContent;
 }
 
 /**
@@ -81,8 +84,8 @@ interface ShowHeadersProps {
  * @constructor
  */
 export const ResponseHeaders: FC<ShowHeadersProps> = ({ response }) => {
-  const rows = getHeaders(response)
-  if (rows.length === 0) return <></>
+  const rows = getHeaders(response);
+  if (rows.length === 0) return <></>;
   return (
     <CollapserCard
       key="headers"
@@ -116,13 +119,13 @@ export const ResponseHeaders: FC<ShowHeadersProps> = ({ response }) => {
         </Table>
       </>
     </CollapserCard>
-  )
-}
+  );
+};
 
 interface ResponseExplorerProps {
-  response: ResponseContent
-  verb: string
-  path: string
+  response: ResponseContent;
+  verb: string;
+  path: string;
 }
 
 /**
@@ -137,8 +140,19 @@ export const ResponseExplorer: FC<ResponseExplorerProps> = ({
   verb,
   path,
 }) => {
-  // TODO make a badge for the verb.
-  // Once we are satisfied with the badge in the api-explorer package it should be moved here
+  const [isOpen, setIsOpen] = useState(false);
+  const error: LookerSDKError =
+    response &&
+    response.statusCode >= 400 &&
+    response.contentType === 'application/json'
+      ? JSON.parse(response.body)
+      : undefined;
+
+  const timed = (response: IRawResponse) => {
+    if (!(response.responseCompleted || response.requestStarted)) return '';
+    const diff = (response.responseCompleted - response.requestStarted) / 1000;
+    return `Seconds: ${diff.toFixed(3)}`;
+  };
 
   return (
     <>
@@ -146,9 +160,25 @@ export const ResponseExplorer: FC<ResponseExplorerProps> = ({
       {response && (
         <>
           <RunItHeading as="h4">
+            {error && (
+              <>
+                <APIErrorDialog
+                  error={error}
+                  isOpen={isOpen}
+                  setOpen={setIsOpen}
+                />
+                <IconButton
+                  size="small"
+                  onClick={() => setIsOpen(true)}
+                  icon={<Warning />}
+                  aria-label="API error"
+                  label="API Error"
+                />
+              </>
+            )}
             {`${verb || ''} ${path || ''} (${response.statusCode}: ${
               response.statusMessage
-            })`}
+            }) ${timed(response)}`}
           </RunItHeading>
           <CollapserCard
             divider={false}
@@ -157,9 +187,14 @@ export const ResponseExplorer: FC<ResponseExplorerProps> = ({
           >
             <ShowResponse response={response} />
           </CollapserCard>
+          {error && (
+            <CollapserCard divider={false} heading={'Error information'}>
+              <APIErrorDisplay error={error} showDoc={true} />
+            </CollapserCard>
+          )}
           <ResponseHeaders response={response} />
         </>
       )}
     </>
-  )
-}
+  );
+};

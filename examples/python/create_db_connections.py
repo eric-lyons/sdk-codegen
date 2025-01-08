@@ -1,5 +1,5 @@
 import looker_sdk
-from looker_sdk import models
+from looker_sdk import models40 as models
 import base64
 
 with open("credentials_file.json", "rb") as f:
@@ -10,7 +10,7 @@ cert = base64.b64encode(cert).decode("utf-8")
 """Base64 encoded Certificate body for server authentication"""
 
 
-sdk = looker_sdk.init31("looker.ini")
+sdk = looker_sdk.init40("looker.ini")
 
 
 sdk.create_connection(

@@ -3,6 +3,7 @@ import com.looker.sdk.DashboardElement
 import com.looker.sdk.RenderTask
 import java.io.File
 import java.lang.Thread.sleep
+import java.util.*
 
 class KotlinExample {
     private val sdk = TestConfig().sdk
@@ -16,11 +17,11 @@ class KotlinExample {
     }
 
     fun getDashboardTile(dash: Dashboard, title: String): DashboardElement? {
-        val lowerTitle = title.toLowerCase()
+        val lowerTitle = title.lowercase(Locale.getDefault())
         if (dash.dashboard_elements.isNullOrEmpty()) {
             return null
         }
-        val element = dash.dashboard_elements!!.filter { element -> (element.title?.toLowerCase() ?: "") == lowerTitle }
+        val element = dash.dashboard_elements!!.filter { element -> (element.title?.lowercase(Locale.getDefault()) ?: "") == lowerTitle }
         if (element.isEmpty()) {
             throw Error("No tile with title $title found on ${dash.title}.")
         }
@@ -33,7 +34,7 @@ class KotlinExample {
             throw Error("No query found on ${tile.title}.")
         }
         try {
-            val queryId = tile.query_id!!.toLong()
+            val queryId = tile.query_id!!
             val task = sdk.ok<RenderTask>(sdk.create_query_render_task(queryId, format, 640, 480))
 
             if (task.id == null) {

@@ -3,12 +3,18 @@ on:
   pull_request:
     paths:
       - python/**
+      - .github/workflows/python-ci.yml
+      - Pipfile
+      - Pipfile.lock
 
   push:
     branches:
       - main
     paths:
       - python/**
+      - .github/workflows/python-ci.yml
+      - Pipfile
+      - Pipfile.lock
 
   workflow_dispatch:
 
@@ -18,6 +24,9 @@ env:
   TOX_JUNIT_OUTPUT_DIR: results
 
 jobs:
+  setup:
+    uses: looker-open-source/reusable-actions/.github/workflows/supported-versions.yml@main
+
   typecheck:
     name: Mypy
     runs-on: ubuntu-latest
@@ -28,13 +37,13 @@ jobs:
 
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.6.0
+        uses: styfle/cancel-workflow-action@0.12.1
         with:
           access_token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: 3.9.9
+          python-version: '3.10'
       - run: pip install -e .
       - run: pip install mypy types-requests
       - run: mypy looker_sdk/
@@ -56,24 +65,24 @@ jobs:
       matrix:
         os:
           - ubuntu
-          - macos
+            # - macos # Temporary disable since runners down
           - windows
         python-version:
-          - '3.9.9'
+          - '3.10'
         include:
-          - python-version: '3.6'
-            os: ubuntu
           - python-version: '3.7'
             os: ubuntu
           - python-version: '3.8'
             os: ubuntu
+          - python-version: '3.9'
+            os: ubuntu
 
     steps:
       - name: Repo Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -87,17 +96,22 @@ jobs:
 
       - name: Upload pytest test results
         if: ${{ always() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: python-test-results
+          name: python-test-results-${{ matrix.os }}-${{ matrix.python-version }}
           path: python/results/
 
   integration:
-    needs: unit
+    needs: [unit, setup]
     name: Integration - ${{ matrix.os }} / Looker.${{ matrix.looker }}
     env:
       TOX_JUNIT_OUTPUT_NAME: ${{ matrix.os }}.Looker-${{ matrix.looker }}.py3.x
-    runs-on: ${{ matrix.os }}-latest
+      LOOKERSDK_CLIENT_ID: ${{ secrets.LOOKERSDK_CLIENT_ID }}
+      LOOKERSDK_CLIENT_SECRET: ${{ secrets.LOOKERSDK_CLIENT_SECRET }}
+      LOOKERSDK_TIMEOUT: 600
+    runs-on:
+      group: ${{ matrix.os }}
+    #runs-on: Ubuntu20.04-4core-16gb
     defaults:
       run:
         shell: bash
@@ -106,11 +120,10 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu
+          - large-ubuntu
         looker:
-          - '21_18'
-          - '21_20'
-          - '22_0'
+          ${{ fromJson(needs.setup.outputs.matrix_json) }}
+
           # TODO uncomment `include:` when either macos or windows works to satisfaction.
           #include:
           # TODO: macos matrix leg is functional but it takes ~20 minutes (compared
@@ -133,14 +146,23 @@ jobs:
           #  looker: '7_20'
     steps:
       - name: Repo Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_AR_READER_SA_KEY }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          create_credentials_file: true
+          export_environment_variables: true
 
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v0.2.0
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          service_account_key: ${{ secrets.GCP_AR_READER_SA_KEY }}
-          export_default_credentials: true
+        uses: google-github-actions/setup-gcloud@v2
 
       - name: Authenticate Artifact Repository
         run: gcloud auth configure-docker us-west1-docker.pkg.dev --quiet
@@ -183,25 +205,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install tox
 
-      - name: Determine credentials version
-        # Prior to 21_18, each version had different credentials and a 
-        # different secret. 21_20 and later all use the same credentials
-        # as 21_18. The parse_version.sh script parses the version and
-        # yields 21_12, 21_14, 21_16 etc for those versions but 21_18 for
-        # anything 21_18, 21_20, 22_0, etc.
-        #
-        # This can be factored out entirely once 21_18 is the earliest
-        # supported looker version.
-        run: |
-          echo "CREDENTIALS_VERSION=$(${{ github.workspace }}/.github/scripts/parse_version.sh <<< ${{ matrix.looker }})" >> $GITHUB_ENV
-
-      - name: Set up Looker credentials
-        # Load the correct credentials based on the version from
-        # the prior step.
-        run: |
-          echo "LOOKERSDK_CLIENT_ID=${{ secrets[format('LOOKERSDK_CLIENT_ID__{0}', env.CREDENTIALS_VERSION )] }}" >> $GITHUB_ENV
-          echo "LOOKERSDK_CLIENT_SECRET=${{ secrets[format('LOOKERSDK_CLIENT_SECRET__{0}', env.CREDENTIALS_VERSION )] }}" >> $GITHUB_ENV
-
       - name: Check that Looker is ready
         run: |
           ${{ github.workspace }}/.github/scripts/wait_for_looker.sh
@@ -211,13 +214,13 @@ jobs:
 
       - name: Upload pytest test results
         if: ${{ always() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: python-test-results
+          name: python-test-results-${{ matrix.os }}-${{ matrix.looker }}
           path: python/results/
 
   twine:
-    needs: integration
+    needs: [unit, integration]
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -225,10 +228,10 @@ jobs:
         working-directory: python/
 
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: 3.9.9
+          python-version: '3.10'
       - name: Twine upload check
         run: |
           pip install wheel twine
@@ -242,7 +245,7 @@ jobs:
 
     steps:
       - name: Download Artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           path: artifacts
 
@@ -252,7 +255,7 @@ jobs:
       - name: Check Results Files Exist
         id: check-results-exist
         run: |
-          if [[ $(ls -l artifacts/python-test-results/*.xml 2> /dev/null | wc -l) -ge "1" ]]; then
+          if [[ $(ls -l artifacts/python-test-results*/*.xml 2> /dev/null | wc -l) -ge "1" ]]; then
             exit 0
           else
             curl --request POST \
@@ -273,13 +276,12 @@ jobs:
 
       - name: Publish Unit Test Results
         if: steps.check-results-exist.outcome == 'success'
-        uses: EnricoMi/publish-unit-test-result-action@v1.12
+        uses: EnricoMi/publish-unit-test-result-action@v2
         with:
           # Cosmetic issue with `check_name` being associated to the wrong
           # workflow: https://github.com/EnricoMi/publish-unit-test-result-action/issues/12
           check_name: Python Tests
           github_token: ${{ secrets.GITHUB_TOKEN }}
           report_individual_runs: true
-          hide_comments: orphaned commits
           check_run_annotations_branch: '*'
-          files: 'artifacts/python-test-results/*.xml'
+          files: 'artifacts/python-test-results*/*.xml'

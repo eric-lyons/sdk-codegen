@@ -23,51 +23,102 @@
  SOFTWARE.
 
  */
-import React from 'react'
-import pick from 'lodash/pick'
-import userEvent from '@testing-library/user-event'
-import { screen } from '@testing-library/react'
+import React from 'react';
+import pick from 'lodash/pick';
+import userEvent from '@testing-library/user-event';
+import { screen } from '@testing-library/react';
 
-import { api } from '../../test-data'
+import { api } from '../../test-data';
 import {
   createTestStore,
   renderWithRouterAndReduxProvider,
-} from '../../test-utils'
-import { SideNavMethods } from './SideNavMethods'
+} from '../../test-utils';
+import { SideNavMethods } from './SideNavMethods';
+
+const mockHistoryPush = jest.fn();
+jest.mock('react-router-dom', () => {
+  const ReactRouterDOM = jest.requireActual('react-router-dom');
+  return {
+    ...ReactRouterDOM,
+    useHistory: () => ({
+      push: mockHistoryPush,
+      location: globalThis.location,
+    }),
+  };
+});
 
 describe('SideNavMethods', () => {
-  const tag = 'Dashboard'
-  const methods = api.tags[tag]
+  const tag = 'Dashboard';
+  const methods = api.tags[tag];
+  const specKey = '4.0';
 
-  test('it renders provided methods', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('it renders provided methods', async () => {
     renderWithRouterAndReduxProvider(
-      <SideNavMethods methods={methods} tag={tag} specKey={'3.1'} />
-    )
-    userEvent.click(screen.getByText(tag))
-    const sideNavItems = screen.getAllByRole('link')
-    expect(sideNavItems).toHaveLength(Object.keys(methods).length)
+      <SideNavMethods methods={methods} tag={tag} specKey={specKey} />
+    );
+    await userEvent.click(screen.getByText(tag));
+    const sideNavItems = screen.getAllByRole('link');
+    expect(sideNavItems).toHaveLength(Object.keys(methods).length);
     expect(sideNavItems[0]).toHaveAttribute(
       'href',
-      `/3.1/methods/${tag}/${Object.values(methods)[0].name}`
-    )
-  })
+      `/${specKey}/methods/${tag}/${Object.values(methods)[0].name}`
+    );
+  });
 
-  test('it highlights text matching search pattern in both tag and methods', () => {
-    const store = createTestStore({ settings: { searchPattern: 'dash' } })
+  test('tag expands and displays methods after clicked', async () => {
+    renderWithRouterAndReduxProvider(
+      <SideNavMethods methods={methods} tag={tag} specKey={specKey} />
+    );
+    const firstMethod = Object.values(methods)[0].schema.summary;
+    expect(screen.queryByText(firstMethod)).not.toBeInTheDocument();
+    await userEvent.click(screen.getByText(tag));
+    expect(mockHistoryPush).toHaveBeenCalledWith(`/${specKey}/methods/${tag}`);
+    expect(screen.getByRole('link', { name: firstMethod })).toBeInTheDocument();
+    expect(screen.getAllByRole('link')).toHaveLength(
+      Object.values(methods).length
+    );
+  });
+
+  test('expanded tag closes when clicked', async () => {
+    renderWithRouterAndReduxProvider(
+      <SideNavMethods
+        methods={methods}
+        tag={tag}
+        specKey={specKey}
+        defaultOpen={true}
+      />
+    );
+    const firstMethod = Object.values(methods)[0].schema.summary;
+    expect(screen.getByRole('link', { name: firstMethod })).toBeInTheDocument();
+    expect(screen.getAllByRole('link')).toHaveLength(
+      Object.values(methods).length
+    );
+    await userEvent.click(screen.getByText(tag));
+    expect(mockHistoryPush).toHaveBeenCalledWith(`/${specKey}/methods`);
+    expect(screen.queryByText(firstMethod)).not.toBeInTheDocument();
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+  });
+
+  test('it highlights text matching search pattern in both tag and methods', async () => {
+    const store = createTestStore({ settings: { searchPattern: 'dash' } });
     renderWithRouterAndReduxProvider(
       <SideNavMethods
         methods={pick(methods, 'create_dashboard')}
         tag={tag}
-        specKey={'3.1'}
+        specKey={specKey}
       />,
       undefined,
       store
-    )
-    userEvent.click(screen.getByText('Dash'))
-    const matches = screen.getAllByText(/dash/i)
-    expect(matches).toHaveLength(2)
-    matches.forEach((match) => {
-      expect(match).toContainHTML('<span class="hi">Dash</span>')
-    })
-  })
-})
+    );
+    await userEvent.click(screen.getByText('Dash'));
+    const matches = screen.getAllByText(/dash/i);
+    expect(matches).toHaveLength(2);
+    matches.forEach(match => {
+      expect(match).toContainHTML('<span class="hi">Dash</span>');
+    });
+  });
+});
